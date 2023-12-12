@@ -27,15 +27,27 @@ class Animal(object):
     def die(self):
         self.alive = False
 
-    def move(self, direction, grid_x, grid_y):
+    def move(self, direction, grid_x, grid_y):         
         if direction == LEFT:
-            self.x += 1 if self.x > 0 else -1
+            if self.x != 0:
+                self.x -= 1
+            else:
+                self.x = grid_x - 1
         if direction == RIGHT:
-            self.x -= 1 if self.x < grid_x -1 else -1
-        if direction == UP:
-            self.y += 1 if self.y < grid_y -1 else -1
+            if self.x != grid_x - 1:
+                self.x += 1
+            else:
+                self.x = 0
         if direction == DOWN:
-            self.y -= 1 if self.y > 0 else -1
+            if self.y != 0:
+                self.y -= 1
+            else:
+                self.y = grid_y - 1
+        if direction == UP:
+            if self.y != grid_y - 1:
+                self.y += 1
+            else:
+                self.y = 0
         return self.x, self.y
             
 
@@ -148,10 +160,10 @@ class Animate:
         self.preds_pos = preds_pos
 
         self.fig, self.ax = plt.subplots()
-        self.ax.set_xlim(0, self.grid_y)
-        self.ax.set_ylim(0, self.grid_y)
-        self.ax.set_xticks(np.arange(self.grid_x))
-        self.ax.set_yticks(np.arange(self.grid_y))
+        self.ax.set_xlim(0, self.grid_y - 1)
+        self.ax.set_ylim(0, self.grid_y - 1)
+        self.ax.set_xticks(np.arange(0, self.grid_x - 1))
+        self.ax.set_yticks(np.arange(0, self.grid_y - 1))
         plt.grid(True)
 
         self.prey_x, self.prey_y = self.coords_at_step(self.preys_pos[0])
@@ -186,4 +198,4 @@ class Animate:
 
 
 if __name__ == '__main__':
-    main(steps=100, grid_x=20, grid_y=20, init_prey=25, init_pred=20)
+    main(steps=100, grid_x=20, grid_y=20, init_prey=40, init_pred=20)
