@@ -74,25 +74,25 @@ def animal_step(animal, grid_x, grid_y):
             animal_grid[pos] += 1
     return animal_grid
 
-def interact(preys, preds, prey_grid, pred_grid):
+def interact(preys, preds, preys_grid, preds_grid):
     # If no preds, 2 prey reproduce wp. prey_newborn
-    for coords, prey_here in prey_grid.items():
+    for coords, prey_here in preys_grid.items():
         if prey_here >= 2:
-            if coords not in pred_grid:
+            if coords not in preds_grid:
                 births = np.random.binomial(np.floor(prey_here / 2), prey_newborn)
-                prey_grid[coords] += births
+                preys_grid[coords] += births
                 for _ in range(births):
                     preys.append(Animal(x_0=coords[0], y_0=coords[1], species="prey"))
 
     # If preds and prey at the same location, each prey dies wp. pred/(prey + pred)
     # If multiple preds, 2 preds reproduce wp. pred_newborn
-    for coords, pred_here in pred_grid.items():
-        if coords in prey_grid:
-            deaths = np.random.binomial(prey_grid[coords], pred_here/(prey_grid[coords] + pred_here))
-            if prey_grid[coords] == deaths:
-                del prey_grid[coords]
+    for coords, pred_here in preds_grid.items():
+        if coords in preys_grid:
+            deaths = np.random.binomial(preys_grid[coords], pred_here/(preys_grid[coords] + pred_here))
+            if preys_grid[coords] == deaths:
+                del preys_grid[coords]
             else:
-                prey_grid[coords] -= deaths
+                preys_grid[coords] -= deaths
             
             # Kill off the prey
             for _ in range(deaths):
@@ -102,11 +102,11 @@ def interact(preys, preds, prey_grid, pred_grid):
 
         if pred_here >= 2:
             births = np.random.binomial(np.floor(pred_here / 2), pred_newborn)
-            pred_grid[coords] += births
+            preds_grid[coords] += births
             for _ in range(births):
                 preds.append(Animal(x_0=coords[0], y_0=coords[1], species="pred"))
 
-    return preys, preds, prey_grid, pred_grid
+    return preys, preds, preys_grid, preds_grid
 
 def remove_dead(preys, preds):
     return [prey for prey in preys if prey.alive], [pred for pred in preds if pred.alive]
@@ -119,22 +119,19 @@ def main(steps, grid_x, grid_y, init_prey, init_pred):
     preys_pos, preds_pos = [preys_grid], [preds_grid]
 
     for _ in range(steps):
-        prey_grid = animal_step(preys, grid_x, grid_y)
-        pred_grid = animal_step(preds, grid_x, grid_y)
-        preys, preds, prey_grid, pred_grid = interact(preys, preds, prey_grid, pred_grid)
+        preys_grid = animal_step(preys, grid_x, grid_y)
+        preds_grid = animal_step(preds, grid_x, grid_y)
+        preys, preds, preys_grid, preds_grid = interact(preys, preds, preys_grid, preds_grid)
         preys, preds = remove_dead(preys, preds)
 
         num_preys.append(len(preys))
         num_preds.append(len(preds))
 
-        preys_pos.append(prey_grid)
-        preds_pos.append(pred_grid)
+        preys_pos.append(preys_grid)
+        preds_pos.append(preds_grid)
 
-        if _ % 10 == 0:
-            print(_)
-
-    plt.plot(np.arange(steps+1), num_preys, label="prey")
-    plt.plot(np.arange(steps+1), num_preds, label="pred")
+    plt.plot(np.arange(steps+1), num_preys, label="Preys")
+    plt.plot(np.arange(steps+1), num_preds, label="Predators")
     plt.legend()
     plt.show()
 
@@ -143,12 +140,12 @@ def main(steps, grid_x, grid_y, init_prey, init_pred):
 
 
 class Animate:
-    def __init__(self, steps, grid_x, grid_y, preys_grid, preds_grid):
+    def __init__(self, steps, grid_x, grid_y, preys_pos, preds_pos):
         self.steps = steps
         self.grid_x = grid_x
         self.grid_y = grid_y
-        self.preys_grid = preys_grid
-        self.preds_grid = preds_grid
+        self.preys_pos = preys_pos
+        self.preds_pos = preds_pos
 
         self.fig, self.ax = plt.subplots()
         self.ax.set_xlim(0, self.grid_y)
@@ -157,10 +154,10 @@ class Animate:
         self.ax.set_yticks(np.arange(self.grid_y))
         plt.grid(True)
 
-        self.prey_x, self.prey_y = self.coords_at_step(self.preys_grid[0])
-        self.pred_x, self.pred_y = self.coords_at_step(self.preds_grid[0])
-        self.prey_point, = self.ax.plot(self.prey_x, self.prey_y, 'bo', label="prey")
-        self.pred_point, = self.ax.plot(self.pred_x, self.pred_y, 'ro', label="pred")
+        self.prey_x, self.prey_y = self.coords_at_step(self.preys_pos[0])
+        self.pred_x, self.pred_y = self.coords_at_step(self.preds_pos[0])
+        self.prey_point, = self.ax.plot(self.prey_x, self.prey_y, 'bo', label="Preys")
+        self.pred_point, = self.ax.plot(self.pred_x, self.pred_y, 'ro', label="Predators")
         self.fig.legend()
         self.txt = self.ax.text(0.1, 0.1,'', ha='center', va='center', alpha=0.8,
                     transform=self.ax.transAxes, fontdict={'color':'black', 'backgroundcolor': 'white', 'size': 10})
@@ -174,11 +171,11 @@ class Animate:
         return x, y
 
     def animate(self, i):
-        self.prey_x, self.prey_y = self.coords_at_step(self.preys_grid[i])
-        self.pred_x, self.pred_y = self.coords_at_step(self.preds_grid[i])
+        self.prey_x, self.prey_y = self.coords_at_step(self.preys_pos[i])
+        self.pred_x, self.pred_y = self.coords_at_step(self.preds_pos[i])
         self.prey_point.set_data(self.prey_x, self.prey_y)
         self.pred_point.set_data(self.pred_x, self.pred_y)
-        self.txt.set_text(f"Step: {i}\nPreys: {sum(v for v in self.preys_grid[i].values())}\nPredators: {sum(v for v in self.preds_grid[i].values())}")
+        self.txt.set_text(f"Step: {i}\nPreys: {sum(v for v in self.preys_pos[i].values())}\nPredators: {sum(v for v in self.preds_pos[i].values())}")
         return self.prey_point, self.pred_point, self.txt
     
     def show(self):
