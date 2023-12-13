@@ -41,10 +41,9 @@ def interact(board: State):
         n_preys, n_preds = len(preys), len(preds)
 
         # 2 prey reproduce wp. prey_newborn
-        if n_preys >= 2:
-            births = np.random.binomial(n_preys // 2, PREY_BIRTH)
-            for _ in range(births):
-                board.add_animal(Prey(x_0=coord[0], y_0=coord[1]))
+        births = np.random.binomial(n_preys // 2, PREY_BIRTH)
+        for _ in range(births):
+            board.add_animal(Prey(x_0=coord[0], y_0=coord[1]))
 
         # Each prey dies wp. prey_death_from_pred for each pred
         n_eaten = 0
@@ -53,11 +52,10 @@ def interact(board: State):
                 board.remove_animal(prey)
                 n_eaten += 1
 
-        # Preds that have eaten reproduce proportional to n_eaten
-        if n_preds >= 2:
-            births = np.random.binomial(n_eaten, PRED_BIRTH_FROM_PREY)
-            for _ in range(births):
-                board.add_animal(Predator(x_0=coord[0], y_0=coord[1]))
+        # Preds reproduce proportional to n_eaten
+        births = np.random.binomial(n_eaten, PRED_BIRTH_FROM_PREY)
+        for _ in range(births):
+            board.add_animal(Predator(x_0=coord[0], y_0=coord[1]))
 
         # Preds naturally die wp. pred_death
         for pred in preds:
