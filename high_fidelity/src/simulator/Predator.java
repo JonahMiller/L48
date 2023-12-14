@@ -2,6 +2,7 @@ package simulator;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class Predator extends Agent {
     public Predator(Point location) {
@@ -22,17 +23,7 @@ public class Predator extends Agent {
     }
 
     @Override
-    public Set<Food> eat(WorldView worldView) {
-        Set<Food> meal = new HashSet<>();
-
-        for (Food food : worldView.foods)
-        {
-            if (getLocation().getDistance(food.getLocation()) < eatRadius)
-            {
-                foodLevel += food.getSustenanceValue();
-                meal.add(food);
-            }
-        }
-        return meal;
+    public Set<Food> canEat(Set<Food> foods) {
+        return foods.stream().filter(food -> food instanceof Prey).collect(Collectors.toSet());
     }
 }

@@ -2,13 +2,14 @@ package simulator;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class Prey extends Agent implements Food {
 
     private static final double sustenanceValue = 50;
 
     @Override
-    public boolean notEaten() {
+    public boolean exists() {
         return alive;
     }
 
@@ -40,17 +41,7 @@ public class Prey extends Agent implements Food {
     }
 
     @Override
-    public Set<Food> eat(WorldView worldView) {
-        Set<Food> meal = new HashSet<>();
-
-        for (Food food : worldView.foods)
-        {
-            if (food instanceof Berry && getLocation().getDistance(food.getLocation()) < eatRadius)
-            {
-                foodLevel += food.getSustenanceValue();
-                meal.add(food);
-            }
-        }
-        return meal;
+    public Set<Food> canEat(Set<Food> foods) {
+        return foods.stream().filter(food -> food instanceof Berry).collect(Collectors.toSet());
     }
 }

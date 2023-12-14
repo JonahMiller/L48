@@ -1,7 +1,7 @@
 package simulator;
 
 public interface Food {
-    public boolean notEaten();
+    public boolean exists();
 
     public void consumed();
     public Point getLocation();

@@ -1,9 +1,6 @@
 package simulator;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class World {
@@ -16,6 +13,16 @@ public class World {
     public static final double maxX = 1000;
     public static final double minY = 0;
     public static final double maxY = 1000;
+
+    private int getFoodCount(double timespan) {
+        double foodCountExpectation = timespan * foodDropRate;
+        int foodCount = (int) Math.floor(foodCountExpectation);
+        foodCountExpectation-= foodCount;
+        if(Math.random() < foodCountExpectation) {
+            foodCount++;
+        }
+        return foodCount;
+    }
 
     private WorldView getWorldView(Point centre, double radius) {
         Set<Agent> animalsSeen = animals.stream().filter(x -> centre.getDistance(x.getLocation()) <= radius).collect(Collectors.toSet());
@@ -37,14 +44,31 @@ public class World {
             }
         }
 
-        int foodDrop = (Math.random() * timespan < 0.1 ? 1 : 0);
+        int foodDrop = getFoodCount(timespan);
 
-        for (int i = 0; i< foodDrop; i++)
+        for (int i = 0; i < foodDrop; i++)
         {
             foods.add(new Berry(getRandomLocation()));
         }
 
+        animals.forEach(animal -> animal.starve(timespan));
+
         animals = animals.stream().filter(Agent::isAlive).collect(Collectors.toSet());
+        foods = foods.stream().filter(Food::exists).collect(Collectors.toSet());
+
+        Set<Agent> offsprings = animals.stream().map(Agent::reproduce).filter(Objects::nonNull).collect(Collectors.toSet());
+
+        animals.addAll(offsprings);
+
+        Set<Food> foodOffsprings = new HashSet<>();
+        for (Agent x : offsprings) {
+            if (x instanceof Food) {
+                foodOffsprings.add((Food) x);
+            }
+        }
+
+        foods.addAll(foodOffsprings);
+
 
     }
 

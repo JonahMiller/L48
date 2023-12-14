@@ -7,7 +7,7 @@ public class Berry implements Food {
     private static final double sustenanceValue = 50;
 
     @Override
-    public boolean notEaten()
+    public boolean exists()
     {
         return alive;
     }
