@@ -8,7 +8,7 @@ public abstract class Agent implements Cloneable {
     protected double speed = 100;
 
     protected boolean alive = true;
-    protected final double viewRadius = 100;
+    protected final double viewRadius = 15;
     protected final double size = 10;
     protected double foodLevel = 50;
     protected final double reproductionFoodLevel = 50;
