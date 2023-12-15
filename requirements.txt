@@ -1,0 +1,6 @@
+matplotlib==3.8.2
+numpy==1.26.2
+ipython==8.18.1
+GPy @ git+https://github.com/SheffieldML/GPy.git@328312f342413994d0dc2451af994995e2c48702
+matplotlib==3.3.4
+emukit==0.4.10

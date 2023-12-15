@@ -63,27 +63,39 @@ def interact(board: State):
                 board.remove_animal(pred)
 
 
-def main(steps, grid_x, grid_y, init_prey, init_pred):
+def simulate(
+    steps: int, grid_x: int, grid_y: int, init_prey: int, init_pred: int, save_all: bool = True
+) -> list[State]:
+    states = []
+
     board = empty_board(grid_x, grid_y)
     populate_board(board, init_prey, init_pred)
+
+    for _ in range(steps):
+        if len(board._preys) == 0 or len(board._preds) == 0:
+            break
+        if save_all:
+            states.append(board.clone())
+
+        animal_step(board)
+        interact(board)
+
+    states.append(board.clone())
+
+    return states
+
+
+def main(steps, grid_x, grid_y, init_prey, init_pred):
+    states = simulate(steps, grid_x, grid_y, init_prey, init_pred)
 
     num_preys, num_preds = [], []
     preys_pos, preds_pos = [], []
 
-    def snapshot(board: State):
+    for board in states:
         num_preys.append(len(board._preys))
         num_preds.append(len(board._preds))
         preys_pos.append({coord: len(board.view_preys_by_loc(coord)) for coord in board.view_coords_with_prey()})
         preds_pos.append({coord: len(board.view_preds_by_loc(coord)) for coord in board.view_coords_with_pred()})
-
-    snapshot(board)
-    for _ in range(steps):
-        animal_step(board)
-        interact(board)
-        snapshot(board)
-
-        # if len(board._preys) == 0 or len(board._preds) == 0:
-        #     break
 
     plt.plot(np.arange(len(num_preys)), num_preys, label="Preys")
     plt.plot(np.arange(len(num_preds)), num_preds, label="Predators")

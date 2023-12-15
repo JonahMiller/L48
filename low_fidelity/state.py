@@ -1,3 +1,4 @@
+import copy
 from itertools import chain
 from typing import Iterable
 
@@ -16,6 +17,10 @@ class State:
         self._preds = {}
         self._prey_grid = LazyGrid()
         self._pred_grid = LazyGrid()
+
+    def clone(self):
+        """Save a copy of the state."""
+        return copy.deepcopy(self)
 
     # --- Provide different views of the state for efficient access ---
     def view_animals(self) -> Iterable[Animal]:
