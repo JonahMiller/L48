@@ -6,25 +6,21 @@ LEFT = 2
 RIGHT = 3
 STAY = 4
 
-PREY_NEWBORN = 0.4
-PRED_NEWBORN = 0.1
-
 
 class Animal:
-    def __init__(self, x_0: int, y_0: int):
+    def __init__(self, x_0: int, y_0: int, energy: int, step_energy: int):
         self.x = x_0
         self.y = y_0
-        self.alive = True
+        self.energy = energy
+        self.step_energy = step_energy
 
     @property
     def pos(self):
         return self.x, self.y
 
-    def die(self):
-        self.alive = False
-
     def step(self, grid_x: int, grid_y: int):
         direction = np.random.randint(0, 5)
+        self.energy -= self.step_energy
         if direction == LEFT:
             self.x = (self.x - 1) % grid_x
         if direction == RIGHT:
@@ -44,3 +40,13 @@ class Prey(Animal):
 
 class Predator(Animal):
     ...
+
+
+class Food:
+    def __init__(self, x_0: int, y_0: int):
+        self.x = x_0
+        self.y = y_0
+
+    @property
+    def pos(self):
+        return self.x, self.y

@@ -2,7 +2,7 @@ import copy
 from itertools import chain
 from typing import Iterable
 
-from low_fidelity.animal import Animal, Predator, Prey
+from low_fidelity.animal import Animal, Predator, Prey, Food
 
 
 class State:
@@ -15,8 +15,11 @@ class State:
         # Internal representation of the state
         self._preys = {}
         self._preds = {}
-        self._prey_grid = LazyGrid()
-        self._pred_grid = LazyGrid()
+        self._prey_grid = LazyAnimalGrid()
+        self._pred_grid = LazyAnimalGrid()
+
+        self._foods = {}
+        self._food_grid = LazyFoodGrid()
 
     def clone(self):
         """Save a copy of the state."""
@@ -32,6 +35,9 @@ class State:
 
     def view_preds_by_loc(self, coord: tuple[int, int]):
         return list(self._pred_grid.get(coord, {}).values())
+    
+    def view_foods_by_loc(self, coord: tuple[int, int]):
+        return list(self._food_grid.get(coord, {}).values())
 
     def view_coords(self):
         for x in range(self.grid_x):
@@ -46,10 +52,16 @@ class State:
         for coord in self._pred_grid.keys():
             yield coord
 
-    def view_coords_with_animal(self):
-        for coord in self._prey_grid.keys() | self._pred_grid.keys():
+    def view_coords_with_food(self):
+        for coord in self._food_grid.keys():
             yield coord
 
+    def view_coords_with_items(self):
+        for coord in self._prey_grid.keys() | \
+                     self._pred_grid.keys() | \
+                     self._food_grid.keys():
+            yield coord
+    
     # --- Methods for modifying the state ---
     def add_animal(self, animal: Animal):
         if isinstance(animal, Prey):
@@ -82,12 +94,26 @@ class State:
             self._pred_grid.add_animal(animal)
         else:
             raise ValueError(f"Unknown animal type {type(animal)}")
+        
+    def add_food(self, food: Food):
+        if isinstance(food, Food):
+            self._foods[id(food)] = food
+            self._food_grid.add_food(food)
+        else:
+            raise ValueError(f"Unknown food type {type(food)}")
+        
+    def remove_food(self, food: Food):
+        if isinstance(food, Food):
+            del self._foods[id(food)]
+            self._food_grid.remove_food(food)
+        else:
+            raise ValueError(f"Unknown food type {type(food)}")
 
 
-class LazyGrid(dict[tuple[int, int], dict[int, Animal]]):
+class LazyAnimalGrid(dict[tuple[int, int], dict[int, Animal]]):
     """A lazy grid for storing animals.
 
-    Only stores locations with more than one animal.
+    Only stores locations with at least one animal.
     """
 
     def __getitem__(self, coord):
@@ -102,3 +128,24 @@ class LazyGrid(dict[tuple[int, int], dict[int, Animal]]):
         del self[animal.pos][id(animal)]
         if len(self[animal.pos]) == 0:
             del self[animal.pos]
+
+
+class LazyFoodGrid(dict[tuple[int, int], dict[int, Food]]):
+    """A lazy grid for storing foods.
+
+    Only stores locations with at least one food.
+    """
+
+    def __getitem__(self, coord):
+        return self.setdefault(coord, {})
+
+    def add_food(self, food: Food):
+        """Adds a food item to the grid"""
+        self[food.pos][id(food)] = food
+
+    def remove_food(self, food: Food):
+        """Remove a food item from the grid"""
+        del self[food.pos][id(food)]
+        if len(self[food.pos]) == 0:
+            del self[food.pos]
+
