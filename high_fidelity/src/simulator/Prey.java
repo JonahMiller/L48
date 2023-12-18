@@ -22,6 +22,7 @@ public class Prey extends Animal implements Food {
     }
 
     @Override
+    // TODO: Do we want to return the prey's foodValue instead?
     public double getSustenanceValue() {
         return sustenanceValue;
     }

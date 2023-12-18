@@ -8,6 +8,7 @@ public class World {
     Set<Food> foods;
 
     private final double foodSpawnRate = 10;
+    private final double maxFoodCount = 500;
 
     private final double spontaneousReproductionRate = 0.1;
 
@@ -18,6 +19,8 @@ public class World {
     public static final double maxX = 1000;
     public static final double minY = 0;
     public static final double maxY = 1000;
+
+    private ReproductionType reproductionType;
 
     private int getFoodCount(double timespan) {
         double foodCountExpectation = timespan * foodSpawnRate;
@@ -54,6 +57,9 @@ public class World {
     private void spawnFood(double timespan) {
         // TODO: Do we want to cap the total amount of food on the map?
         int foodCount = getFoodCount(timespan);
+        if(getBerryLocations().size() > maxFoodCount) {
+            foodCount = 0;
+        }
 
         for (int i = 0; i < foodCount; i++) {
             foods.add(new Berry(getRandomLocation()));
@@ -68,24 +74,6 @@ public class World {
         animals = animals.stream().filter(Animal::isAlive).collect(Collectors.toSet());
         foods = foods.stream().filter(Food::exists).collect(Collectors.toSet());
     }
-
-    // Animals reproduce based on food
-    private void reproduceAnimals() {
-        Set<Animal> offsprings = animals.stream().filter(Animal::canReproduce).map(Animal::reproduce)
-                .filter(Objects::nonNull).collect(Collectors.toSet());
-
-        animals.addAll(offsprings);
-
-        Set<Food> foodOffsprings = new HashSet<>();
-        for (Animal x : offsprings) {
-            if (x instanceof Food) {
-                foodOffsprings.add((Food) x);
-            }
-        }
-
-        foods.addAll(foodOffsprings);
-    }
-
     private double sampleExponentialVariable(double lambda) {
         // We do 1-[0,1) as Math.random() might return 0 but not 1
         return -Math.log(1 - Math.random()) / lambda;
@@ -104,14 +92,21 @@ public class World {
         return offsprings;
     }
 
-    // Animals reproduce spontaneously regardless of food level
-    private void reproduceAnimals2(double timespan) {
-        // TODO: Can this be optimised? Does it have to be?
-        Set<Animal> offsprings = animals.stream().map(x -> spontaneouslyReproduceAnimal(x, timespan))
-                .reduce(new HashSet<>(), (x, y) -> {
-                    x.addAll(y);
-                    return y;
-                });
+    private void reproduceAnimals(ReproductionType reproductionType, double timespan) {
+        Set<Animal> offsprings;
+        if(reproductionType == ReproductionType.FOOD) {
+            // Animals reproduce based on food level
+            offsprings = animals.stream().filter(Animal::canReproduce).map(Animal::reproduce)
+                    .filter(Objects::nonNull).collect(Collectors.toSet());
+        } else {
+            // Animals reproduce spontaneously regardless of food level
+            // TODO: Can this be optimised? Does it have to be?
+            offsprings = animals.stream().map(x -> spontaneouslyReproduceAnimal(x, timespan))
+                    .reduce(new HashSet<>(), (x, y) -> {
+                        x.addAll(y);
+                        return y;
+                    });
+        }
 
         animals.addAll(offsprings);
 
@@ -154,7 +149,7 @@ public class World {
 
         handleDeaths();
 
-        reproduceAnimals();
+        reproduceAnimals(reproductionType, timespan);
 
         spawnAnimalsSpontaneously(timespan);
 
@@ -166,7 +161,9 @@ public class World {
         return new Point(x, y);
     }
 
-    public World(int preyCount, int predatorCount, int berryCount) {
+    public World(ReproductionType reproductionType, int preyCount, int predatorCount, int berryCount) {
+        this.reproductionType = reproductionType;
+
         this.animals = new HashSet<Animal>();
         this.foods = new HashSet<Food>();
 

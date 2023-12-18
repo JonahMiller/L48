@@ -1,5 +1,6 @@
 package PyInterface;
 
+import simulator.ReproductionType;
 import simulator.World;
 
 import java.util.Arrays;
@@ -8,8 +9,12 @@ import java.util.stream.Collectors;
 
 public class Callable {
     public static void main(String[] args) {
-        List<Integer> formArgs = Arrays.stream(args).mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
-        World world = new World(formArgs.get(0), formArgs.get(1), formArgs.get(2));
+
+        ReproductionType reproductionType = ReproductionType.valueOf(args[0]);
+        String[] intArgs = Arrays.copyOfRange(args, 1, args.length);
+        List<Integer> worldArgs = Arrays.stream(intArgs).mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
+
+        World world = new World(reproductionType, worldArgs.get(0), worldArgs.get(1), worldArgs.get(2));
         int cnt = 0;
         while(true) {
             try {
@@ -23,7 +28,7 @@ public class Callable {
 
             System.out.printf("%d %d %d %d%n", cnt, preys, predators, berries);
 
-            if(preys == 0 || cnt>=500) {
+            if(cnt == 1000) {
                 break;
             }
             cnt++;

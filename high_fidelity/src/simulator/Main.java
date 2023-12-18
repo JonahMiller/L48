@@ -6,7 +6,7 @@ import javax.swing.*;
 
 public class Main {
     public static void main(String[] args) {
-        World world = new World(10,20,10);
+        World world = new World(ReproductionType.FOOD, 100,20,100);
         UIFrame frame = new UIFrame(world);
         frame.setVisible(true);
         int cnt = 0;
