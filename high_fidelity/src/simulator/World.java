@@ -36,7 +36,7 @@ public class World {
 
 
     private void feedAnimals() {
-        for (Agent agent : animals.stream().toList())
+        for (Agent agent : animals.stream().collect(Collectors.toList()))
         {
             if (agent.isAlive())
             {
