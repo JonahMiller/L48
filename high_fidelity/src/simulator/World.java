@@ -22,16 +22,18 @@ public class World {
     private int getFoodCount(double timespan) {
         double foodCountExpectation = timespan * foodSpawnRate;
         int foodCount = (int) Math.floor(foodCountExpectation);
-        foodCountExpectation-= foodCount;
-        if(Math.random() < foodCountExpectation) {
+        foodCountExpectation -= foodCount;
+        if (Math.random() < foodCountExpectation) {
             foodCount++;
         }
         return foodCount;
     }
 
     private WorldView getWorldView(Point centre, double radius) {
-        Set<Animal> animalsSeen = animals.stream().filter(x -> centre.getDistance(x.getLocation()) <= radius).collect(Collectors.toSet());
-        Set<Food> foodsSeen = foods.stream().filter(x -> centre.getDistance(x.getLocation()) <= radius).collect(Collectors.toSet());
+        Set<Animal> animalsSeen = animals.stream().filter(x -> centre.getDistance(x.getLocation()) <= radius)
+                .collect(Collectors.toSet());
+        Set<Food> foodsSeen = foods.stream().filter(x -> centre.getDistance(x.getLocation()) <= radius)
+                .collect(Collectors.toSet());
         return new WorldView(animalsSeen, foodsSeen);
     }
 
@@ -39,12 +41,9 @@ public class World {
         animals.forEach(x -> x.move(getWorldView(x.getLocation(), x.getViewRadius()), timespan));
     }
 
-
     private void feedAnimals() {
-        for (Animal animal : animals.stream().toList())
-        {
-            if (animal.isAlive())
-            {
+        for (Animal animal : animals.stream().collect(Collectors.toList())) {
+            if (animal.isAlive()) {
                 Set<Food> meal = animal.eat(getWorldView(animal.getLocation(), animal.getViewRadius()));
                 meal.forEach(Food::consumed);
                 foods.removeAll(meal);
@@ -56,8 +55,7 @@ public class World {
         // TODO: Do we want to cap the total amount of food on the map?
         int foodCount = getFoodCount(timespan);
 
-        for (int i = 0; i < foodCount; i++)
-        {
+        for (int i = 0; i < foodCount; i++) {
             foods.add(new Berry(getRandomLocation()));
         }
     }
@@ -73,8 +71,8 @@ public class World {
 
     // Animals reproduce based on food
     private void reproduceAnimals() {
-        Set<Animal> offsprings = animals.stream().filter(Animal::canReproduce).
-                map(Animal::reproduce).filter(Objects::nonNull).collect(Collectors.toSet());
+        Set<Animal> offsprings = animals.stream().filter(Animal::canReproduce).map(Animal::reproduce)
+                .filter(Objects::nonNull).collect(Collectors.toSet());
 
         animals.addAll(offsprings);
 
@@ -96,7 +94,7 @@ public class World {
     private Set<Animal> spontaneouslyReproduceAnimal(Animal animal, double timespan) {
         double nextReproductionTime = sampleExponentialVariable(spontaneousReproductionRate);
         Set<Animal> offsprings = new HashSet<>();
-        if(nextReproductionTime <= timespan) {
+        if (nextReproductionTime <= timespan) {
             Animal offspring = animal.reproduce();
             offsprings.add(offspring);
             // TODO: Do we want these calls?
@@ -109,8 +107,11 @@ public class World {
     // Animals reproduce spontaneously regardless of food level
     private void reproduceAnimals2(double timespan) {
         // TODO: Can this be optimised? Does it have to be?
-        Set<Animal> offsprings = animals.stream().map(x -> spontaneouslyReproduceAnimal(x, timespan)).
-                reduce(new HashSet<>(), (x,y) -> {x.addAll(y); return y;} );
+        Set<Animal> offsprings = animals.stream().map(x -> spontaneouslyReproduceAnimal(x, timespan))
+                .reduce(new HashSet<>(), (x, y) -> {
+                    x.addAll(y);
+                    return y;
+                });
 
         animals.addAll(offsprings);
 
@@ -127,8 +128,8 @@ public class World {
     private void spawnAnimalsSpontaneously(double timespan) {
         double nextSpawnTime = sampleExponentialVariable(preySpawnRate + predatorSpawnRate);
         // Could do recursively but it would be slower
-        while(nextSpawnTime <= timespan) {
-            if(Math.random() * (preySpawnRate + predatorSpawnRate) < preySpawnRate) { // We spawn a prey
+        while (nextSpawnTime <= timespan) {
+            if (Math.random() * (preySpawnRate + predatorSpawnRate) < preySpawnRate) { // We spawn a prey
                 Prey prey = new Prey(getRandomLocation());
                 this.animals.add(prey);
                 this.foods.add(prey);
@@ -141,8 +142,6 @@ public class World {
             nextSpawnTime = sampleExponentialVariable(preySpawnRate + predatorSpawnRate);
         }
     }
-
-
 
     public void advanceTimeBy(double timespan) {
         moveAnimals(timespan);
@@ -164,27 +163,25 @@ public class World {
     private Point getRandomLocation() {
         double x = Math.random() * (maxX - minX) + minX;
         double y = Math.random() * (maxY - minY) + minY;
-        return new Point(x,y);
+        return new Point(x, y);
     }
 
     public World(int preyCount, int predatorCount, int berryCount) {
         this.animals = new HashSet<Animal>();
         this.foods = new HashSet<Food>();
 
-        for(int i = 0; i < preyCount; i++) {
+        for (int i = 0; i < preyCount; i++) {
             Prey prey = new Prey(getRandomLocation());
             this.animals.add(prey);
             this.foods.add(prey);
         }
 
-
-        for(int i = 0; i < predatorCount; i++) {
+        for (int i = 0; i < predatorCount; i++) {
             Predator predator = new Predator(getRandomLocation());
             this.animals.add(predator);
         }
 
-
-        for(int i = 0; i < berryCount; i++) {
+        for (int i = 0; i < berryCount; i++) {
             Berry berry = new Berry(getRandomLocation());
             this.foods.add(berry);
         }
@@ -193,32 +190,30 @@ public class World {
     // Maybe include sizes later
     public List<Point> getPreyLocations() {
         List<Point> preyLocations = new ArrayList<>();
-        for(Animal animal : animals) {
-            if(animal instanceof Prey) {
+        for (Animal animal : animals) {
+            if (animal instanceof Prey) {
                 preyLocations.add(animal.getLocation());
             }
         }
         return preyLocations;
     }
 
-
     // Maybe include sizes later
     public List<Point> getPredatorLocations() {
         List<Point> predatorLocations = new ArrayList<>();
-        for(Animal animal : animals) {
-            if(animal instanceof Predator) {
+        for (Animal animal : animals) {
+            if (animal instanceof Predator) {
                 predatorLocations.add(animal.getLocation());
             }
         }
         return predatorLocations;
     }
 
-
     // Maybe include sizes later
     public List<Point> getBerryLocations() {
         List<Point> berryLocations = new ArrayList<>();
-        for(Food food : foods) {
-            if(food instanceof Berry) {
+        for (Food food : foods) {
+            if (food instanceof Berry) {
                 berryLocations.add(food.getLocation());
             }
         }
