@@ -30,10 +30,12 @@ public class World {
         return new WorldView(animalsSeen, foodsSeen);
     }
 
-    public void advanceTimeBy(double timespan) {
+    private void moveAnimals(double timespan) {
         animals.forEach(x -> x.move(getWorldView(x.getLocation(), x.getViewRadius()), timespan));
+    }
 
 
+    private void feedAnimals() {
         for (Agent agent : animals.stream().toList())
         {
             if (agent.isAlive())
@@ -43,6 +45,9 @@ public class World {
                 foods.removeAll(meal);
             }
         }
+    }
+
+    private void spawnFood(double timespan) {
 
         int foodDrop = getFoodCount(timespan);
 
@@ -50,12 +55,18 @@ public class World {
         {
             foods.add(new Berry(getRandomLocation()));
         }
+    }
 
+    private void starveAnimals(double timespan) {
         animals.forEach(animal -> animal.starve(timespan));
+    }
 
+    private void handleDeaths() {
         animals = animals.stream().filter(Agent::isAlive).collect(Collectors.toSet());
         foods = foods.stream().filter(Food::exists).collect(Collectors.toSet());
+    }
 
+    private void reproduceAnimals() {
         Set<Agent> offsprings = animals.stream().map(Agent::reproduce).filter(Objects::nonNull).collect(Collectors.toSet());
 
         animals.addAll(offsprings);
@@ -68,6 +79,22 @@ public class World {
         }
 
         foods.addAll(foodOffsprings);
+    }
+
+
+
+    public void advanceTimeBy(double timespan) {
+        moveAnimals(timespan);
+
+        feedAnimals();
+
+        spawnFood(timespan);
+
+        starveAnimals(timespan);
+
+        handleDeaths();
+
+        reproduceAnimals();
 
 
     }
