@@ -88,14 +88,13 @@ public abstract class Animal implements Cloneable {
 
     }
 
-    public abstract Set<Food> canEat(Set<Food> foods);
+    public abstract boolean canEat(Food food);
     public Set<Food> eat(WorldView worldView) {
         Set<Food> meal = new HashSet<>();
 
-        Set<Food> eatable = canEat(worldView.foods);
-        for (Food food : eatable)
+        for (Food food : worldView.foods)
         {
-            if (getLocation().getDistance(food.getLocation()) < eatRadius)
+            if (getLocation().getDistance(food.getLocation()) < eatRadius && canEat(food))
             {
                 foodLevel += food.getSustenanceValue();
                 meal.add(food);

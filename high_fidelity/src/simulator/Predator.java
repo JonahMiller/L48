@@ -9,7 +9,7 @@ public class Predator extends Animal {
     }
 
     @Override
-    public Set<Food> canEat(Set<Food> foods) {
-        return foods.stream().filter(food -> food instanceof Prey).collect(Collectors.toSet());
+    public boolean canEat(Food food) {
+        return food instanceof Prey;
     }
 }

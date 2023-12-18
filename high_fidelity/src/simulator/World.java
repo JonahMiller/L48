@@ -33,11 +33,12 @@ public class World {
     }
 
     private WorldView getWorldView(Point centre, double radius) {
-        Set<Animal> animalsSeen = animals.stream().filter(x -> centre.getDistance(x.getLocation()) <= radius)
-                .collect(Collectors.toSet());
-        Set<Food> foodsSeen = foods.stream().filter(x -> centre.getDistance(x.getLocation()) <= radius)
-                .collect(Collectors.toSet());
-        return new WorldView(animalsSeen, foodsSeen);
+//        Set<Animal> animalsSeen = animals.stream().filter(x -> centre.getDistance(x.getLocation()) <= radius)
+//                .collect(Collectors.toSet());
+//        Set<Food> foodsSeen = foods.stream().filter(x -> centre.getDistance(x.getLocation()) <= radius)
+//                .collect(Collectors.toSet());
+//        return new WorldView(animalsSeen, foodsSeen);
+        return new WorldView(animals, foods);
     }
 
     private void moveAnimals(double timespan) {
