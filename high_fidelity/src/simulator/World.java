@@ -9,13 +9,21 @@ public class World {
 
     public final static Random rng = new Random(0);
 
-    private final double foodSpawnRate = 10;
-    private final double maxFoodCount = 500;
+    private final int maxFoodCount;
+
+    private final double berrySustenance;
+    private final double preySustenance;
+    private final double startingFoodLevel;
+    private final double starvationCoefficient;
+    private final double eatingRadius;
+    private final double reproductionFoodLevel;
+    private final double speed;
 
     private final double spontaneousReproductionRate = 0.1;
 
-    private final double preySpawnRate = 0.05;
-    private final double predatorSpawnRate = 0.05;
+    private final double preySpawnRate;
+    private final double predatorSpawnRate;
+    private final double foodSpawnRate;
 
     public static final double minX = 0;
     public static final double maxX = 1000;
@@ -65,7 +73,7 @@ public class World {
         }
 
         for (int i = 0; i < foodCount; i++) {
-            foods.add(new Berry(getRandomLocation()));
+            foods.add(new Berry(getRandomLocation(), berrySustenance));
         }
     }
 
@@ -128,11 +136,11 @@ public class World {
         // Could do recursively but it would be slower
         while (nextSpawnTime <= timespan) {
             if (rng.nextDouble() * (preySpawnRate + predatorSpawnRate) < preySpawnRate) { // We spawn a prey
-                Prey prey = new Prey(getRandomLocation());
+                Prey prey = new Prey(getRandomLocation(), startingFoodLevel, starvationCoefficient, eatingRadius, reproductionFoodLevel, speed, preySustenance);
                 this.animals.add(prey);
                 this.foods.add(prey);
             } else { // We spawn a predator
-                Predator predator = new Predator(getRandomLocation());
+                Predator predator = new Predator(getRandomLocation(), startingFoodLevel, starvationCoefficient, eatingRadius, reproductionFoodLevel, speed);
                 this.animals.add(predator);
             }
 
@@ -164,25 +172,50 @@ public class World {
         return new Point(x, y);
     }
 
-    public World(ReproductionType reproductionType, int preyCount, int predatorCount, int berryCount) {
+    public World(ReproductionType reproductionType,
+                 int startingPreyCount,
+                 int startingPredatorCount,
+                 int startingBerryCount,
+                 int maxFoodCount,
+                 double berrySustenance,
+                 double preySustenance,
+                 double startingFoodLevel,
+                 double starvationCoefficient,
+                 double eatingRadius,
+                 double reproductionFoodLevel,
+                 double speed,
+                 double preySpawnRate,
+                 double predatorSpawnRate,
+                 double foodSpawnRate) {
         this.reproductionType = reproductionType;
+        this.maxFoodCount = maxFoodCount;
+        this.berrySustenance = berrySustenance;
+        this.preySustenance = preySustenance;
+        this.startingFoodLevel = startingFoodLevel;
+        this.starvationCoefficient = starvationCoefficient;
+        this.eatingRadius = eatingRadius;
+        this.reproductionFoodLevel = reproductionFoodLevel;
+        this.preySpawnRate = preySpawnRate;
+        this.predatorSpawnRate = predatorSpawnRate;
+        this.foodSpawnRate = foodSpawnRate;
+        this.speed = speed;
 
         this.animals = new HashSet<Animal>();
         this.foods = new HashSet<Food>();
 
-        for (int i = 0; i < preyCount; i++) {
-            Prey prey = new Prey(getRandomLocation());
+        for (int i = 0; i < startingPreyCount; i++) {
+            Prey prey = new Prey(getRandomLocation(), startingFoodLevel, starvationCoefficient, eatingRadius, reproductionFoodLevel, speed, preySustenance);
             this.animals.add(prey);
             this.foods.add(prey);
         }
 
-        for (int i = 0; i < predatorCount; i++) {
-            Predator predator = new Predator(getRandomLocation());
+        for (int i = 0; i < startingPredatorCount; i++) {
+            Predator predator = new Predator(getRandomLocation(), startingFoodLevel, starvationCoefficient, eatingRadius, reproductionFoodLevel, speed);
             this.animals.add(predator);
         }
 
-        for (int i = 0; i < berryCount; i++) {
-            Berry berry = new Berry(getRandomLocation());
+        for (int i = 0; i < startingBerryCount; i++) {
+            Berry berry = new Berry(getRandomLocation(), berrySustenance);
             this.foods.add(berry);
         }
     }

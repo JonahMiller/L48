@@ -5,17 +5,15 @@ import java.util.Set;
 
 public abstract class Animal implements Cloneable {
     private Point location;
-    protected double speed = 100;
 
     protected boolean alive = true;
-    protected final double viewRadius = 15;
-    protected final double size = 10;
-    protected double foodLevel = 50;
-    protected final double reproductionFoodLevel = 50;
-
-    protected final double eatRadius = 10;
-
-    protected final double starvationCoefficient = 2;
+    protected final double viewRadius = 15; // WARNING: unused
+//    protected final double size = 10;
+    protected double foodLevel;
+    protected final double starvationCoefficient;
+    protected final double eatingRadius;
+    protected final double reproductionFoodLevel;
+    protected final double speed;
 
     public Point getLocation() {
         return location;
@@ -51,9 +49,16 @@ public abstract class Animal implements Cloneable {
     {
         this.alive = false;
     }
+
     public double getViewRadius() {return viewRadius;}
-    public Animal(Point location) {
+
+    public Animal(Point location, double startingFoodLevel, double starvationCoefficient, double eatingRadius, double reproductionFoodLevel, double speed) {
         this.location = location;
+        this.foodLevel = startingFoodLevel;
+        this.starvationCoefficient = starvationCoefficient;
+        this.eatingRadius = eatingRadius;
+        this.reproductionFoodLevel = reproductionFoodLevel;
+        this.speed = speed;
     }
 
     private boolean isWithinWorldBoundaries(Point p) {
@@ -94,7 +99,7 @@ public abstract class Animal implements Cloneable {
 
         for (Food food : worldView.foods)
         {
-            if (getLocation().getDistance(food.getLocation()) < eatRadius && canEat(food))
+            if (getLocation().getDistance(food.getLocation()) < eatingRadius && canEat(food))
             {
                 foodLevel += food.getSustenanceValue();
                 meal.add(food);

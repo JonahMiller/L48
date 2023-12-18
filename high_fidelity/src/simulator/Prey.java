@@ -5,7 +5,7 @@ import java.util.stream.Collectors;
 
 public class Prey extends Animal implements Food {
 
-    private static final double sustenanceValue = 50;
+    private final double sustenanceValue;
 
     @Override
     public boolean exists() {
@@ -17,8 +17,9 @@ public class Prey extends Animal implements Food {
         super.die();
     }
 
-    public Prey(Point location) {
-        super(location);
+    public Prey(Point location, double startingFoodLevel, double starvationCoefficient, double eatingRadius, double reproductionFoodLevel, double speed, double sustenanceValue) {
+        super(location, startingFoodLevel, starvationCoefficient, eatingRadius, reproductionFoodLevel, speed);
+        this.sustenanceValue = sustenanceValue;
     }
 
     @Override

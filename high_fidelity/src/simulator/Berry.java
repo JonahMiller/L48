@@ -4,7 +4,7 @@ public class Berry implements Food {
 
     private boolean alive = true;
     private final Point location;
-    private static final double sustenanceValue = 50;
+    private final double sustenanceValue;
 
     @Override
     public boolean exists()
@@ -18,8 +18,9 @@ public class Berry implements Food {
         alive = false;
     }
 
-    public Berry(Point location) {
+    public Berry(Point location, double sustenanceValue) {
         this.location = location;
+        this.sustenanceValue = sustenanceValue;
     }
 
     @Override
