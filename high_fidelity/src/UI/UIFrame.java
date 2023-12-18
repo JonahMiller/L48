@@ -3,6 +3,7 @@ package UI;
 import javax.swing.*;
 import java.awt.*;
 import java.util.List;
+
 import simulator.World;
 import simulator.Point;
 
@@ -31,7 +32,7 @@ class Panel extends JPanel {
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         g.setColor(Color.WHITE);
-        g.fillRect(0,0, getWidth(), getHeight());
+        g.fillRect(0, 0, getWidth(), getHeight());
 
         List<Point> preys = this.world.getPreyLocations();
         List<Point> predators = this.world.getPredatorLocations();
@@ -58,6 +59,7 @@ class Panel extends JPanel {
         }
     }
 }
+
 public class UIFrame extends JFrame {
 
     // constructor

@@ -17,7 +17,13 @@ public class Prey extends Animal implements Food {
         super.die();
     }
 
-    public Prey(Point location, double startingFoodLevel, double starvationCoefficient, double eatingRadius, double reproductionFoodLevel, double speed, double sustenanceValue) {
+    public Prey(Point location,
+                double startingFoodLevel,
+                double starvationCoefficient,
+                double eatingRadius,
+                double reproductionFoodLevel,
+                double speed,
+                double sustenanceValue) {
         super(location, startingFoodLevel, starvationCoefficient, eatingRadius, reproductionFoodLevel, speed);
         this.sustenanceValue = sustenanceValue;
     }

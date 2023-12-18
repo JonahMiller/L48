@@ -13,9 +13,11 @@ public class Callable {
         ReproductionType reproductionType = ReproductionType.valueOf(args[0]);
         String[] intArgs = Arrays.copyOfRange(args, 1, 6);
         String[] doubleArgs = Arrays.copyOfRange(args, 6, args.length);
-        List<Integer> intWorldArgs = Arrays.stream(intArgs).mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
-        List<Double> doubleWorldArgs = Arrays.stream(doubleArgs).mapToDouble(Double::parseDouble).boxed().collect(Collectors.toList());
-        int stepLimit =  intWorldArgs.get(0);
+        List<Integer> intWorldArgs = Arrays.stream(intArgs).mapToInt(Integer::parseInt).boxed()
+                                           .collect(Collectors.toList());
+        List<Double> doubleWorldArgs = Arrays.stream(doubleArgs).mapToDouble(Double::parseDouble).boxed()
+                                             .collect(Collectors.toList());
+        int stepLimit = intWorldArgs.get(0);
         int startingPreyCount = intWorldArgs.get(1);
         int startingPredatorCount = intWorldArgs.get(2);
         int startingBerryCount = intWorldArgs.get(3);
@@ -55,7 +57,7 @@ public class Callable {
         while(true) {
             try {
                 world.advanceTimeBy(timestep);
-            } catch (Exception e) {
+            } catch(Exception e) {
                 System.out.println(e);
             }
             int preys = world.getPreyLocations().size();

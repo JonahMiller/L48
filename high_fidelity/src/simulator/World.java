@@ -36,7 +36,7 @@ public class World {
         double foodCountExpectation = timespan * foodSpawnRate;
         int foodCount = (int) Math.floor(foodCountExpectation);
         foodCountExpectation -= foodCount;
-        if (rng.nextDouble() < foodCountExpectation) {
+        if(rng.nextDouble() < foodCountExpectation) {
             foodCount++;
         }
         return foodCount;
@@ -56,8 +56,8 @@ public class World {
     }
 
     private void feedAnimals() {
-        for (Animal animal : animals.stream().collect(Collectors.toList())) {
-            if (animal.isAlive()) {
+        for(Animal animal : animals.stream().collect(Collectors.toList())) {
+            if(animal.isAlive()) {
                 Set<Food> meal = animal.eat(getWorldView(animal.getLocation(), animal.getViewRadius()));
                 meal.forEach(Food::consumed);
                 foods.removeAll(meal);
@@ -72,7 +72,7 @@ public class World {
             foodCount = 0;
         }
 
-        for (int i = 0; i < foodCount; i++) {
+        for(int i = 0; i < foodCount; i++) {
             foods.add(new Berry(getRandomLocation(), berrySustenance));
         }
     }
@@ -85,6 +85,7 @@ public class World {
         animals = animals.stream().filter(Animal::isAlive).collect(Collectors.toSet());
         foods = foods.stream().filter(Food::exists).collect(Collectors.toSet());
     }
+
     private double sampleExponentialVariable(double lambda) {
         // We do 1-[0,1) as rng.nextDouble() might return 0 but not 1
         return -Math.log(1 - rng.nextDouble()) / lambda;
@@ -93,7 +94,7 @@ public class World {
     private Set<Animal> spontaneouslyReproduceAnimal(Animal animal, double timespan) {
         double nextReproductionTime = sampleExponentialVariable(spontaneousReproductionRate);
         Set<Animal> offsprings = new HashSet<>();
-        if (nextReproductionTime <= timespan) {
+        if(nextReproductionTime <= timespan) {
             Animal offspring = animal.reproduce();
             offsprings.add(offspring);
             // TODO: Do we want these calls?
@@ -108,22 +109,22 @@ public class World {
         if(reproductionType == ReproductionType.FOOD) {
             // Animals reproduce based on food level
             offsprings = animals.stream().filter(Animal::canReproduce).map(Animal::reproduce)
-                    .filter(Objects::nonNull).collect(Collectors.toSet());
+                                .filter(Objects::nonNull).collect(Collectors.toSet());
         } else {
             // Animals reproduce spontaneously regardless of food level
             // TODO: Can this be optimised? Does it have to be?
             offsprings = animals.stream().map(x -> spontaneouslyReproduceAnimal(x, timespan))
-                    .reduce(new HashSet<>(), (x, y) -> {
-                        x.addAll(y);
-                        return y;
-                    });
+                                .reduce(new HashSet<>(), (x, y) -> {
+                                    x.addAll(y);
+                                    return y;
+                                });
         }
 
         animals.addAll(offsprings);
 
         Set<Food> foodOffsprings = new HashSet<>();
-        for (Animal x : offsprings) {
-            if (x instanceof Food) {
+        for(Animal x : offsprings) {
+            if(x instanceof Food) {
                 foodOffsprings.add((Food) x);
             }
         }
@@ -134,13 +135,24 @@ public class World {
     private void spawnAnimalsSpontaneously(double timespan) {
         double nextSpawnTime = sampleExponentialVariable(preySpawnRate + predatorSpawnRate);
         // Could do recursively but it would be slower
-        while (nextSpawnTime <= timespan) {
-            if (rng.nextDouble() * (preySpawnRate + predatorSpawnRate) < preySpawnRate) { // We spawn a prey
-                Prey prey = new Prey(getRandomLocation(), startingFoodLevel, starvationCoefficient, eatingRadius, reproductionFoodLevel, speed, preySustenance);
+        while(nextSpawnTime <= timespan) {
+            if(rng.nextDouble() * (preySpawnRate + predatorSpawnRate) < preySpawnRate) { // We spawn a prey
+                Prey prey = new Prey(getRandomLocation(),
+                                     startingFoodLevel,
+                                     starvationCoefficient,
+                                     eatingRadius,
+                                     reproductionFoodLevel,
+                                     speed,
+                                     preySustenance);
                 this.animals.add(prey);
                 this.foods.add(prey);
             } else { // We spawn a predator
-                Predator predator = new Predator(getRandomLocation(), startingFoodLevel, starvationCoefficient, eatingRadius, reproductionFoodLevel, speed);
+                Predator predator = new Predator(getRandomLocation(),
+                                                 startingFoodLevel,
+                                                 starvationCoefficient,
+                                                 eatingRadius,
+                                                 reproductionFoodLevel,
+                                                 speed);
                 this.animals.add(predator);
             }
 
@@ -203,18 +215,29 @@ public class World {
         this.animals = new HashSet<Animal>();
         this.foods = new HashSet<Food>();
 
-        for (int i = 0; i < startingPreyCount; i++) {
-            Prey prey = new Prey(getRandomLocation(), startingFoodLevel, starvationCoefficient, eatingRadius, reproductionFoodLevel, speed, preySustenance);
+        for(int i = 0; i < startingPreyCount; i++) {
+            Prey prey = new Prey(getRandomLocation(),
+                                 startingFoodLevel,
+                                 starvationCoefficient,
+                                 eatingRadius,
+                                 reproductionFoodLevel,
+                                 speed,
+                                 preySustenance);
             this.animals.add(prey);
             this.foods.add(prey);
         }
 
-        for (int i = 0; i < startingPredatorCount; i++) {
-            Predator predator = new Predator(getRandomLocation(), startingFoodLevel, starvationCoefficient, eatingRadius, reproductionFoodLevel, speed);
+        for(int i = 0; i < startingPredatorCount; i++) {
+            Predator predator = new Predator(getRandomLocation(),
+                                             startingFoodLevel,
+                                             starvationCoefficient,
+                                             eatingRadius,
+                                             reproductionFoodLevel,
+                                             speed);
             this.animals.add(predator);
         }
 
-        for (int i = 0; i < startingBerryCount; i++) {
+        for(int i = 0; i < startingBerryCount; i++) {
             Berry berry = new Berry(getRandomLocation(), berrySustenance);
             this.foods.add(berry);
         }
@@ -223,8 +246,8 @@ public class World {
     // Maybe include sizes later
     public List<Point> getPreyLocations() {
         List<Point> preyLocations = new ArrayList<>();
-        for (Animal animal : animals) {
-            if (animal instanceof Prey) {
+        for(Animal animal : animals) {
+            if(animal instanceof Prey) {
                 preyLocations.add(animal.getLocation());
             }
         }
@@ -234,8 +257,8 @@ public class World {
     // Maybe include sizes later
     public List<Point> getPredatorLocations() {
         List<Point> predatorLocations = new ArrayList<>();
-        for (Animal animal : animals) {
-            if (animal instanceof Predator) {
+        for(Animal animal : animals) {
+            if(animal instanceof Predator) {
                 predatorLocations.add(animal.getLocation());
             }
         }
@@ -245,8 +268,8 @@ public class World {
     // Maybe include sizes later
     public List<Point> getBerryLocations() {
         List<Point> berryLocations = new ArrayList<>();
-        for (Food food : foods) {
-            if (food instanceof Berry) {
+        for(Food food : foods) {
+            if(food instanceof Berry) {
                 berryLocations.add(food.getLocation());
             }
         }
