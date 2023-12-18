@@ -68,8 +68,8 @@ public abstract class Animal implements Cloneable {
     // This can be overridden in the subclasses later if we want differing behaviours
     public Point getMoveUnchecked(WorldView worldView, double timespan) {
 
-        double move_dist = Math.random() * this.speed * timespan;
-        double move_angle = Math.random() * 2 * Math.PI;
+        double move_dist = World.rng.nextDouble() * this.speed * timespan;
+        double move_angle = World.rng.nextDouble() * 2 * Math.PI;
 
         double move_x = Math.cos(move_angle) * move_dist;
         double move_y = Math.sin(move_angle) * move_dist;

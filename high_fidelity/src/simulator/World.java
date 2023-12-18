@@ -7,6 +7,8 @@ public class World {
     Set<Animal> animals;
     Set<Food> foods;
 
+    public final static Random rng = new Random(0);
+
     private final double foodSpawnRate = 10;
     private final double maxFoodCount = 500;
 
@@ -26,7 +28,7 @@ public class World {
         double foodCountExpectation = timespan * foodSpawnRate;
         int foodCount = (int) Math.floor(foodCountExpectation);
         foodCountExpectation -= foodCount;
-        if (Math.random() < foodCountExpectation) {
+        if (rng.nextDouble() < foodCountExpectation) {
             foodCount++;
         }
         return foodCount;
@@ -76,8 +78,8 @@ public class World {
         foods = foods.stream().filter(Food::exists).collect(Collectors.toSet());
     }
     private double sampleExponentialVariable(double lambda) {
-        // We do 1-[0,1) as Math.random() might return 0 but not 1
-        return -Math.log(1 - Math.random()) / lambda;
+        // We do 1-[0,1) as rng.nextDouble() might return 0 but not 1
+        return -Math.log(1 - rng.nextDouble()) / lambda;
     }
 
     private Set<Animal> spontaneouslyReproduceAnimal(Animal animal, double timespan) {
@@ -125,7 +127,7 @@ public class World {
         double nextSpawnTime = sampleExponentialVariable(preySpawnRate + predatorSpawnRate);
         // Could do recursively but it would be slower
         while (nextSpawnTime <= timespan) {
-            if (Math.random() * (preySpawnRate + predatorSpawnRate) < preySpawnRate) { // We spawn a prey
+            if (rng.nextDouble() * (preySpawnRate + predatorSpawnRate) < preySpawnRate) { // We spawn a prey
                 Prey prey = new Prey(getRandomLocation());
                 this.animals.add(prey);
                 this.foods.add(prey);
@@ -157,8 +159,8 @@ public class World {
     }
 
     private Point getRandomLocation() {
-        double x = Math.random() * (maxX - minX) + minX;
-        double y = Math.random() * (maxY - minY) + minY;
+        double x = rng.nextDouble() * (maxX - minX) + minX;
+        double y = rng.nextDouble() * (maxY - minY) + minY;
         return new Point(x, y);
     }
 
