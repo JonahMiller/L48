@@ -13,8 +13,12 @@ public class Callable {
         ReproductionType reproductionType = ReproductionType.valueOf(args[0]);
         String[] intArgs = Arrays.copyOfRange(args, 1, args.length);
         List<Integer> worldArgs = Arrays.stream(intArgs).mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
+        int stepLimit =  worldArgs.get(0);
+        int startingPreyCount = worldArgs.get(1);
+        int startingPredatorCount = worldArgs.get(2);
+        int startingBerryCount = worldArgs.get(3);
 
-        World world = new World(reproductionType, worldArgs.get(0), worldArgs.get(1), worldArgs.get(2));
+        World world = new World(reproductionType, startingPreyCount, startingPredatorCount, startingBerryCount);
         int cnt = 0;
         while(true) {
             try {
@@ -28,7 +32,7 @@ public class Callable {
 
             System.out.printf("%d %d %d %d%n", cnt, preys, predators, berries);
 
-            if(cnt == 1000) {
+            if(cnt == stepLimit) {
                 break;
             }
             cnt++;
