@@ -34,9 +34,6 @@ public class Main {
                 System.out.println("Berries: " + berries);
                 System.out.println();
             }
-            if(preys == 0) {
-                break;
-            }
             cnt++;
 
         }

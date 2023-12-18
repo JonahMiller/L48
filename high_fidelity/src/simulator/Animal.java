@@ -3,7 +3,7 @@ package simulator;
 import java.util.HashSet;
 import java.util.Set;
 
-public abstract class Agent implements Cloneable {
+public abstract class Animal implements Cloneable {
     private Point location;
     protected double speed = 100;
 
@@ -27,17 +27,17 @@ public abstract class Agent implements Cloneable {
         if (foodLevel<=0) die();
     }
 
-    public Agent reproduce()  {
-        if(foodLevel >= reproductionFoodLevel) {
-            foodLevel /= 2;
-            try {
-                Agent offspring = (Agent) this.clone();
-                return offspring;
-            } catch (CloneNotSupportedException e) {
-                System.out.println(e);
-                return null;
-            }
-        } else {
+    public boolean canReproduce() {
+        return (foodLevel >= reproductionFoodLevel);
+    }
+
+    public Animal reproduce()  {
+        foodLevel /= 2;
+        try {
+            Animal offspring = (Animal) this.clone();
+            return offspring;
+        } catch (CloneNotSupportedException e) {
+            System.out.println(e);
             return null;
         }
     }
@@ -52,7 +52,7 @@ public abstract class Agent implements Cloneable {
         this.alive = false;
     }
     public double getViewRadius() {return viewRadius;}
-    public Agent(Point location) {
+    public Animal(Point location) {
         this.location = location;
     }
 
@@ -65,7 +65,19 @@ public abstract class Agent implements Cloneable {
         return location.getDistance(move) <= speed * timespan && isWithinWorldBoundaries(move);
     }
 
-    public abstract Point getMoveUnchecked(WorldView worldView, double timespan);
+    // This can be overridden in the subclasses later if we want differing behaviours
+    public Point getMoveUnchecked(WorldView worldView, double timespan) {
+
+        double move_dist = Math.random() * this.speed * timespan;
+        double move_angle = Math.random() * 2 * Math.PI;
+
+        double move_x = Math.cos(move_angle) * move_dist;
+        double move_y = Math.sin(move_angle) * move_dist;
+
+        Point movement = new Point(move_x,move_y);
+
+        return this.getLocation().add(movement);
+    }
     public final void move(WorldView worldView, double timespan) {
         Point newLocation = getMoveUnchecked(worldView, timespan);
         while (!checkMove(newLocation, timespan)){
