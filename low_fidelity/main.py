@@ -3,28 +3,51 @@ import numpy as np
 from matplotlib import animation as animation
 import random
 
-from low_fidelity.animal import Predator, Prey, Food
-from low_fidelity.animate import Animate
-from low_fidelity.state import State
+# from low_fidelity.animal import Predator, Prey, Food
+# from low_fidelity.animate import Animate
+# from low_fidelity.state import State
 
+from animal import Predator, Prey, Food
+from animate import Animate
+from state import State
+
+STEPS = 1000
+
+GRID_X = 10
+GRID_Y = 10
+
+INIT_PREY = 200
+INIT_PRED = 20
+
+# Number of food added randomly each step. All previously 
+# uneaten food is also removed each step.
+NUM_FOOD = 70
+
+# If a prey and n predators meet, the chance of prey being
+# eaten is 1 - (PREY_DEATH_FROM_PRED)^n
 PREY_DEATH_FROM_PRED = 0.1
 
+# Starting energy for each animal. If their energy falls 
+# <= 0 they die.
 PREY_ENERGY = 20
 PRED_ENERGY = 50
 
+# How much energy each animal expends per step
 PREY_STEP_ENERGY = 2
 PRED_STEP_ENERGY = 3
 
+# How much energy each animal gets from eating
 PREY_ENERGY_FROM_FOOD = 3
 PRED_ENERGY_FROM_PREY = 10
 
+# How much energy each animal needs to be able to reproduce
 PREY_REPRODUCTION_THRESHOLD = 15
 PRED_REPRODUCTION_THRESHOLD = 40
 
+# If they reach the energy threshold above, what proportion 
+# of animals will reproduce
 PREY_REPRODUCTION_CHANCE = 0.3
 PRED_REPRODUCTION_CHANCE = 0.1
-
-NUM_FOOD = 1000
 
 
 def empty_board(grid_x: int, grid_y: int):
@@ -164,4 +187,4 @@ def main(steps, grid_x, grid_y, init_prey, init_pred):
 
 
 if __name__ == "__main__":
-    main(steps=500, grid_x=30, grid_y=30, init_prey=2000, init_pred=200)
+    main(steps=STEPS, grid_x=GRID_X, grid_y=GRID_Y, init_prey=INIT_PREY, init_pred=INIT_PRED)
