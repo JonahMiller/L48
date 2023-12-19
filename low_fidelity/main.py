@@ -3,13 +3,9 @@ import numpy as np
 from matplotlib import animation as animation
 import random
 
-# from low_fidelity.animal import Predator, Prey, Food
-# from low_fidelity.animate import Animate
-# from low_fidelity.state import State
-
-from animal import Predator, Prey, Food
-from animate import Animate
-from state import State
+from low_fidelity.animal import Predator, Prey, Food
+from low_fidelity.animate import Animate
+from low_fidelity.state import State
 
 STEPS = 1000
 
