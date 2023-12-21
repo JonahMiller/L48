@@ -15,9 +15,10 @@ GRID_Y = 10
 INIT_PREY = 200
 INIT_PRED = 20
 
-# Number of food added randomly each step. All previously 
-# uneaten food is also removed each step.
-NUM_FOOD = 70
+# Number of food added randomly each step, and the maximal
+# amount of food allowed on the board
+NUM_FOOD = 10
+MAX_FOOD = 500
 
 # If a prey and n predators meet, the chance of prey being
 # eaten is 1 - (PREY_DEATH_FROM_PRED)^n
@@ -107,7 +108,7 @@ def repopulate_board(board: State):
     
 
 def spawn_food(board: State):
-    num_food = NUM_FOOD
+    num_food = min(NUM_FOOD, MAX_FOOD - board.view_food_count())
     food_x = np.random.randint(0, board.grid_x, size=num_food)
     food_y = np.random.randint(0, board.grid_x, size=num_food)
     for x, y in zip(food_x, food_y):
