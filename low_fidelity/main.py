@@ -9,8 +9,8 @@ from low_fidelity.state import State
 
 STEPS = 1000
 
-GRID_X = 10
-GRID_Y = 10
+GRID_X = 20
+GRID_Y = 20
 
 INIT_PREY = 200
 INIT_PRED = 20
@@ -22,29 +22,29 @@ MAX_FOOD = 500
 
 # If a prey and n predators meet, the chance of prey being
 # eaten is 1 - (PREY_DEATH_FROM_PRED)^n
-PREY_DEATH_FROM_PRED = 0.1
+PREY_DEATH_FROM_PRED = 1.0
 
 # Starting energy for each animal. If their energy falls 
 # <= 0 they die.
-PREY_ENERGY = 20
+PREY_ENERGY = 50
 PRED_ENERGY = 50
 
 # How much energy each animal expends per step
 PREY_STEP_ENERGY = 2
-PRED_STEP_ENERGY = 3
+PRED_STEP_ENERGY = 2
 
 # How much energy each animal gets from eating
 PREY_ENERGY_FROM_FOOD = 50
 PRED_ENERGY_FROM_PREY = 50
 
 # How much energy each animal needs to be able to reproduce
-PREY_REPRODUCTION_THRESHOLD = 15
-PRED_REPRODUCTION_THRESHOLD = 40
+PREY_REPRODUCTION_THRESHOLD = 100
+PRED_REPRODUCTION_THRESHOLD = 100
 
 # If they reach the energy threshold above, what proportion 
 # of animals will reproduce
-PREY_REPRODUCTION_CHANCE = 0.3
-PRED_REPRODUCTION_CHANCE = 0.1
+PREY_REPRODUCTION_CHANCE = 1.0
+PRED_REPRODUCTION_CHANCE = 1.0
 
 # Animals spawn spontaneously even if there are no other animals
 # of their type to reproduce 
@@ -207,12 +207,13 @@ def main(steps, grid_x, grid_y, init_prey, init_pred):
 
     plt.plot(np.arange(len(num_preys)), num_preys, label="Preys")
     plt.plot(np.arange(len(num_preds)), num_preds, label="Predators")
+    # plt.plot(np.arange(len(num_foods)), num_foods, label="Food")
     plt.ylim(0, None)
     plt.legend()
     plt.savefig("preys_preds.png", dpi=300)
 
-    a = Animate(len(preds_pos), grid_x, grid_y, preys_pos, preds_pos, foods_pos)
-    a.show()
+    #a = Animate(len(preds_pos), grid_x, grid_y, preys_pos, preds_pos, foods_pos)
+    #a.show()
 
 
 if __name__ == "__main__":
