@@ -55,12 +55,25 @@ class State:
     def view_coords_with_food(self):
         for coord in self._food_grid.keys():
             yield coord
+            
+    def view_food_count(self):            
+        return len(self._foods)
+        
 
     def view_coords_with_items(self):
         for coord in self._prey_grid.keys() | \
                      self._pred_grid.keys() | \
                      self._food_grid.keys():
             yield coord
+           
+    def view_state_summary(self):
+        num_preys = len(self._preys)
+        num_preds = len(self._preds)
+        num_foods = len(self._foods)
+        preys_pos = {coord: len(self.view_preys_by_loc(coord)) for coord in self.view_coords_with_prey()}
+        preds_pos = {coord: len(self.view_preds_by_loc(coord)) for coord in self.view_coords_with_pred()}
+        foods_pos = {coord: len(self.view_foods_by_loc(coord)) for coord in self.view_coords_with_food()}
+        return (num_preys, num_preds, num_foods), (preys_pos, preds_pos, foods_pos)
     
     # --- Methods for modifying the state ---
     def add_animal(self, animal: Animal):

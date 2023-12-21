@@ -176,13 +176,13 @@ def simulate(
         if len(board._preys) == 0 or len(board._preds) == 0:
             break
         if save_all:
-            states.append(board.clone())
+            states.append(board.view_state_summary())
 
         animal_step(board)
         interact(board)
         repopulate_board(board)
 
-    states.append(board.clone())
+    states.append(board.view_state_summary())
 
     return states
 
@@ -193,13 +193,17 @@ def main(steps, grid_x, grid_y, init_prey, init_pred):
     num_preys, num_preds, num_foods = [], [], []
     preys_pos, preds_pos, foods_pos = [], [], []
 
-    for board in states:
-        num_preys.append(len(board._preys))
-        num_preds.append(len(board._preds))
-        num_foods.append(len(board._foods))
-        preys_pos.append({coord: len(board.view_preys_by_loc(coord)) for coord in board.view_coords_with_prey()})
-        preds_pos.append({coord: len(board.view_preds_by_loc(coord)) for coord in board.view_coords_with_pred()})
-        foods_pos.append({coord: len(board.view_foods_by_loc(coord)) for coord in board.view_coords_with_food()})
+    for board_summary in states:
+        nums, pos = board_summary
+        curr_num_preys, curr_num_preds, curr_num_foods = nums
+        curr_preys_pos, curr_preds_pos, curr_foods_pos = pos
+        
+        num_preys.append(curr_num_preys)
+        num_preds.append(curr_num_preds)
+        num_foods.append(curr_num_foods)
+        preys_pos.append(curr_preys_pos)
+        preds_pos.append(curr_preds_pos)
+        foods_pos.append(curr_foods_pos)
 
     plt.plot(np.arange(len(num_preys)), num_preys, label="Preys")
     plt.plot(np.arange(len(num_preds)), num_preds, label="Predators")
