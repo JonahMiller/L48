@@ -7,13 +7,15 @@ public abstract class Animal implements Cloneable {
     private Point location;
 
     protected boolean alive = true;
-    protected final double viewRadius = 15; // WARNING: unused
+    //    protected final double viewRadius = 15; // WARNING: unused
     //    protected final double size = 10;
     protected double energy;
     protected final double starvationCoefficient;
     protected final double stepEnergy;
     protected final double eatingRadius;
+    protected final double eatingProbability;
     protected final double reproductionEnergyThreshold;
+    protected final double reproductionProbability;
     protected final double speed;
 
     public Point getLocation() {
@@ -28,7 +30,7 @@ public abstract class Animal implements Cloneable {
     }
 
     public boolean canReproduce() {
-        return (energy >= reproductionEnergyThreshold);
+        return (energy >= reproductionEnergyThreshold) && (World.rng.nextDouble() < reproductionProbability);
     }
 
     public Animal reproduce() {
@@ -50,23 +52,27 @@ public abstract class Animal implements Cloneable {
         this.alive = false;
     }
 
-    public double getViewRadius() {
-        return viewRadius;
-    }
+//    public double getViewRadius() {
+//        return viewRadius;
+//    }
 
-    public Animal(Point location,
-                  double startingEnergy,
-                  double starvationCoefficient,
-                  double stepEnergy,
-                  double eatingRadius,
-                  double reproductionEnergyThreshold,
-                  double speed) {
+    protected Animal(Point location,
+                     double startingEnergy,
+                     double starvationCoefficient,
+                     double stepEnergy,
+                     double eatingRadius,
+                     double eatingProbability,
+                     double reproductionEnergyThreshold,
+                     double reproductionProbability,
+                     double speed) {
         this.location = location;
         this.energy = startingEnergy;
         this.starvationCoefficient = starvationCoefficient;
         this.stepEnergy = stepEnergy;
         this.eatingRadius = eatingRadius;
+        this.eatingProbability = eatingProbability;
         this.reproductionEnergyThreshold = reproductionEnergyThreshold;
+        this.reproductionProbability = reproductionProbability;
         this.speed = speed;
     }
 
@@ -103,13 +109,26 @@ public abstract class Animal implements Cloneable {
 
     public abstract boolean canEat(Food food);
 
-    public Set<Food> eat(WorldView worldView) {
+    private boolean doesEatWithProbability(double p, double timespan) {
+        double notEatingProbability = Math.pow(1 - p, timespan);
+        double eatingProbability = 1 - notEatingProbability;
+        return World.rng.nextDouble() < eatingProbability;
+    }
+
+    public Set<Food> eat(WorldView worldView, double timespan) {
         Set<Food> meal = new HashSet<>();
 
         for(Food food : worldView.foods) {
             if(getLocation().getDistance(food.getLocation()) < eatingRadius && canEat(food)) {
-                energy += food.getSustenanceValue();
-                meal.add(food);
+                if(this instanceof Predator) {
+                    if(doesEatWithProbability(eatingProbability, timespan)) {
+                        energy += food.getSustenanceValue();
+                        meal.add(food);
+                    }
+                } else {
+                    energy += food.getSustenanceValue();
+                    meal.add(food);
+                }
             }
         }
         return meal;

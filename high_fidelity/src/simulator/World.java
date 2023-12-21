@@ -51,7 +51,7 @@ public class World {
         return foodCount;
     }
 
-    private WorldView getWorldView(Point centre, double radius) {
+    private WorldView getWorldView(Point centre) {
 //        Set<Animal> animalsSeen = animals.stream().filter(x -> centre.getDistance(x.getLocation()) <= radius)
 //                .collect(Collectors.toSet());
 //        Set<Food> foodsSeen = foods.stream().filter(x -> centre.getDistance(x.getLocation()) <= radius)
@@ -61,13 +61,13 @@ public class World {
     }
 
     private void moveAnimals(double timespan) {
-        animals.forEach(x -> x.move(getWorldView(x.getLocation(), x.getViewRadius()), timespan));
+        animals.forEach(x -> x.move(getWorldView(x.getLocation()), timespan));
     }
 
-    private void feedAnimals() {
+    private void feedAnimals(double timespan) {
         for(Animal animal : animals.stream().collect(Collectors.toList())) {
             if(animal.isAlive()) {
-                Set<Food> meal = animal.eat(getWorldView(animal.getLocation(), animal.getViewRadius()));
+                Set<Food> meal = animal.eat(getWorldView(animal.getLocation()), timespan);
                 meal.forEach(Food::consumed);
                 foods.removeAll(meal);
             }
@@ -153,6 +153,7 @@ public class World {
                                      preyStepEnergy,
                                      eatingRadius,
                                      preyReproductionEnergyThreshold,
+                                     preyReproductionProbability,
                                      speed,
                                      preySustenance);
                 this.animals.add(prey);
@@ -163,7 +164,9 @@ public class World {
                                                  predatorStarvation,
                                                  predatorStepEnergy,
                                                  eatingRadius,
+                                                 predatorEatingProbability,
                                                  predatorReproductionEnergyThreshold,
+                                                 predatorReproductionProbability,
                                                  speed);
                 this.animals.add(predator);
             }
@@ -176,7 +179,7 @@ public class World {
     public void advanceTimeBy(double timespan) {
         moveAnimals(timespan);
 
-        feedAnimals();
+        feedAnimals(timespan);
 
         spawnFood(timespan);
 
@@ -250,6 +253,7 @@ public class World {
                                  preyStepEnergy,
                                  eatingRadius,
                                  preyReproductionEnergyThreshold,
+                                 preyReproductionProbability,
                                  speed,
                                  preySustenance);
             this.animals.add(prey);
@@ -262,7 +266,9 @@ public class World {
                                              predatorStarvation,
                                              predatorStepEnergy,
                                              eatingRadius,
+                                             predatorEatingProbability,
                                              predatorReproductionEnergyThreshold,
+                                             predatorReproductionProbability,
                                              speed);
             this.animals.add(predator);
         }

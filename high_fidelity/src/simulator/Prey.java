@@ -23,6 +23,7 @@ public class Prey extends Animal implements Food {
                 double stepEnergy,
                 double eatingRadius,
                 double reproductionEnergyThreshold,
+                double reproductionProbability,
                 double speed,
                 double sustenanceValue) {
         super(location,
@@ -30,7 +31,9 @@ public class Prey extends Animal implements Food {
               starvationCoefficient,
               stepEnergy,
               eatingRadius,
+              1,
               reproductionEnergyThreshold,
+              reproductionProbability,
               speed);
         this.sustenanceValue = sustenanceValue;
     }

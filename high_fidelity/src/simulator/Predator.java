@@ -6,14 +6,18 @@ public class Predator extends Animal {
                     double starvationCoefficient,
                     double stepEnergy,
                     double eatingRadius,
+                    double eatingProbability,
                     double reproductionEnergyThreshold,
+                    double reproductionProbability,
                     double speed) {
         super(location,
               startingEnergy,
               starvationCoefficient,
               stepEnergy,
               eatingRadius,
+              eatingProbability,
               reproductionEnergyThreshold,
+              reproductionProbability,
               speed);
     }
 
