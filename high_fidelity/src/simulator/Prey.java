@@ -18,18 +18,25 @@ public class Prey extends Animal implements Food {
     }
 
     public Prey(Point location,
-                double startingFoodLevel,
+                double startingEnergy,
                 double starvationCoefficient,
+                double stepEnergy,
                 double eatingRadius,
-                double reproductionFoodLevel,
+                double reproductionEnergyThreshold,
                 double speed,
                 double sustenanceValue) {
-        super(location, startingFoodLevel, starvationCoefficient, eatingRadius, reproductionFoodLevel, speed);
+        super(location,
+              startingEnergy,
+              starvationCoefficient,
+              stepEnergy,
+              eatingRadius,
+              reproductionEnergyThreshold,
+              speed);
         this.sustenanceValue = sustenanceValue;
     }
 
     @Override
-    // TODO: Do we want to return the prey's foodLevel instead?
+    // TODO: Do we want to return the prey's energy instead?
     public double getSustenanceValue() {
         return sustenanceValue;
     }

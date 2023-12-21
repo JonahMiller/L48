@@ -2,12 +2,19 @@ package simulator;
 
 public class Predator extends Animal {
     public Predator(Point location,
-                    double startingFoodLevel,
+                    double startingEnergy,
                     double starvationCoefficient,
+                    double stepEnergy,
                     double eatingRadius,
-                    double reproductionFoodLevel,
+                    double reproductionEnergyThreshold,
                     double speed) {
-        super(location, startingFoodLevel, starvationCoefficient, eatingRadius, reproductionFoodLevel, speed);
+        super(location,
+              startingEnergy,
+              starvationCoefficient,
+              stepEnergy,
+              eatingRadius,
+              reproductionEnergyThreshold,
+              speed);
     }
 
     @Override

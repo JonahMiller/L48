@@ -25,17 +25,25 @@ public class Callable {
 
         double berrySustenance = doubleWorldArgs.get(0);
         double preySustenance = doubleWorldArgs.get(1);
-        double startingFoodLevel = doubleWorldArgs.get(2);
-        double starvationCoefficient = doubleWorldArgs.get(3);
-        double eatingRadius = doubleWorldArgs.get(4);
-        double reproductionFoodLevel = doubleWorldArgs.get(5);
-        double speed = doubleWorldArgs.get(6);
+        double preyStartingEnergy = doubleWorldArgs.get(2);
+        double predatorStartingEnergy = doubleWorldArgs.get(3);
+        double preyStarvation = doubleWorldArgs.get(4);
+        double predatorStarvation = doubleWorldArgs.get(5);
+        double preyStepEnergy = doubleWorldArgs.get(6);
+        double predatorStepEnergy = doubleWorldArgs.get(7);
+        double eatingRadius = doubleWorldArgs.get(8);
+        double predatorEatingProbability = doubleWorldArgs.get(9);
+        double preyReproductionEnergyThreshold = doubleWorldArgs.get(10);
+        double predatorReproductionEnergyThreshold = doubleWorldArgs.get(11);
+        double preyReproductionProbability = doubleWorldArgs.get(12);
+        double predatorReproductionProbability = doubleWorldArgs.get(13);
+        double speed = doubleWorldArgs.get(14);
 
-        double preySpawnRate = doubleWorldArgs.get(7);
-        double predatorSpawnRate = doubleWorldArgs.get(8);
-        double foodSpawnRate = doubleWorldArgs.get(9);
+        double preySpawnRate = doubleWorldArgs.get(15);
+        double predatorSpawnRate = doubleWorldArgs.get(16);
+        double foodSpawnRate = doubleWorldArgs.get(17);
 
-        double timestep = doubleWorldArgs.get(10);
+        double timestep = doubleWorldArgs.get(18);
 
 
         World world = new World(reproductionType,
@@ -45,10 +53,18 @@ public class Callable {
                                 maxFoodCount,
                                 berrySustenance,
                                 preySustenance,
-                                startingFoodLevel,
-                                starvationCoefficient,
+                                preyStartingEnergy,
+                                predatorStartingEnergy,
+                                preyStarvation,
+                                predatorStarvation,
+                                preyStepEnergy,
+                                predatorStepEnergy,
                                 eatingRadius,
-                                reproductionFoodLevel,
+                                predatorEatingProbability,
+                                preyReproductionEnergyThreshold,
+                                predatorReproductionEnergyThreshold,
+                                preyReproductionProbability,
+                                predatorReproductionProbability,
                                 speed,
                                 preySpawnRate,
                                 predatorSpawnRate,

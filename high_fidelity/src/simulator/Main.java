@@ -6,9 +6,29 @@ import javax.swing.*;
 
 public class Main {
     public static void main(String[] args) {
-        World world = new World(ReproductionType.FOOD, 100, 20, 100, 500,
-                                50, 50, 50, 2, 10, 100, 100,
-                                0.05, 0.05, 10);
+        World world = new World(ReproductionType.FOOD,
+                                100,
+                                20,
+                                100,
+                                500,
+                                50,
+                                50,
+                                50,
+                                50,
+                                2,
+                                2,
+                                0,
+                                0,
+                                25,
+                                1.0,
+                                100,
+                                100,
+                                1,
+                                1,
+                                80,
+                                0.05,
+                                0.05,
+                                10);
         UIFrame frame = new UIFrame(world);
         frame.setVisible(true);
         int cnt = 0;

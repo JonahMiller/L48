@@ -7,16 +7,24 @@ public class World {
     Set<Animal> animals;
     Set<Food> foods;
 
-    public final static Random rng = new Random(0);
+    public final static Random rng = new Random();
 
     private final int maxFoodCount;
 
     private final double berrySustenance;
     private final double preySustenance;
-    private final double startingFoodLevel;
-    private final double starvationCoefficient;
+    private final double preyStartingEnergy;
+    private final double predatorStartingEnergy;
+    private final double preyStarvation;
+    private final double predatorStarvation;
+    private final double preyStepEnergy;
+    private final double predatorStepEnergy;
     private final double eatingRadius;
-    private final double reproductionFoodLevel;
+    private final double predatorEatingProbability;
+    private final double preyReproductionEnergyThreshold;
+    private final double predatorReproductionEnergyThreshold;
+    private final double preyReproductionProbability;
+    private final double predatorReproductionProbability;
     private final double speed;
 
     private final double spontaneousReproductionRate = 0.1;
@@ -24,6 +32,7 @@ public class World {
     private final double preySpawnRate;
     private final double predatorSpawnRate;
     private final double foodSpawnRate;
+
 
     public static final double minX = 0;
     public static final double maxX = 1000;
@@ -133,25 +142,28 @@ public class World {
     }
 
     private void spawnAnimalsSpontaneously(double timespan) {
+        // TODO: Replace with Poisson distribution
         double nextSpawnTime = sampleExponentialVariable(preySpawnRate + predatorSpawnRate);
         // Could do recursively but it would be slower
         while(nextSpawnTime <= timespan) {
             if(rng.nextDouble() * (preySpawnRate + predatorSpawnRate) < preySpawnRate) { // We spawn a prey
                 Prey prey = new Prey(getRandomLocation(),
-                                     startingFoodLevel,
-                                     starvationCoefficient,
+                                     preyStartingEnergy,
+                                     preyStarvation,
+                                     preyStepEnergy,
                                      eatingRadius,
-                                     reproductionFoodLevel,
+                                     preyReproductionEnergyThreshold,
                                      speed,
                                      preySustenance);
                 this.animals.add(prey);
                 this.foods.add(prey);
             } else { // We spawn a predator
                 Predator predator = new Predator(getRandomLocation(),
-                                                 startingFoodLevel,
-                                                 starvationCoefficient,
+                                                 predatorStartingEnergy,
+                                                 predatorStarvation,
+                                                 predatorStepEnergy,
                                                  eatingRadius,
-                                                 reproductionFoodLevel,
+                                                 predatorReproductionEnergyThreshold,
                                                  speed);
                 this.animals.add(predator);
             }
@@ -191,10 +203,18 @@ public class World {
                  int maxFoodCount,
                  double berrySustenance,
                  double preySustenance,
-                 double startingFoodLevel,
-                 double starvationCoefficient,
+                 double preyStartingEnergy,
+                 double predatorStartingEnergy,
+                 double preyStarvation,
+                 double predatorStarvation,
+                 double preyStepEnergy,
+                 double predatorStepEnergy,
                  double eatingRadius,
-                 double reproductionFoodLevel,
+                 double predatorEatingProbability,
+                 double preyReproductionEnergyThreshold,
+                 double predatorReproductionEnergyThreshold,
+                 double preyReproductionProbability,
+                 double predatorReproductionProbability,
                  double speed,
                  double preySpawnRate,
                  double predatorSpawnRate,
@@ -203,10 +223,18 @@ public class World {
         this.maxFoodCount = maxFoodCount;
         this.berrySustenance = berrySustenance;
         this.preySustenance = preySustenance;
-        this.startingFoodLevel = startingFoodLevel;
-        this.starvationCoefficient = starvationCoefficient;
+        this.preyStartingEnergy = preyStartingEnergy;
+        this.predatorStartingEnergy = predatorStartingEnergy;
+        this.preyStarvation = preyStarvation;
+        this.predatorStarvation = predatorStarvation;
+        this.preyStepEnergy = preyStepEnergy;
+        this.predatorStepEnergy = predatorStepEnergy;
+        this.predatorEatingProbability = predatorEatingProbability;
+        this.preyReproductionEnergyThreshold = preyReproductionEnergyThreshold;
+        this.predatorReproductionEnergyThreshold = predatorReproductionEnergyThreshold;
+        this.preyReproductionProbability = preyReproductionProbability;
+        this.predatorReproductionProbability = predatorReproductionProbability;
         this.eatingRadius = eatingRadius;
-        this.reproductionFoodLevel = reproductionFoodLevel;
         this.preySpawnRate = preySpawnRate;
         this.predatorSpawnRate = predatorSpawnRate;
         this.foodSpawnRate = foodSpawnRate;
@@ -217,10 +245,11 @@ public class World {
 
         for(int i = 0; i < startingPreyCount; i++) {
             Prey prey = new Prey(getRandomLocation(),
-                                 startingFoodLevel,
-                                 starvationCoefficient,
+                                 preyStartingEnergy,
+                                 preyStarvation,
+                                 preyStepEnergy,
                                  eatingRadius,
-                                 reproductionFoodLevel,
+                                 preyReproductionEnergyThreshold,
                                  speed,
                                  preySustenance);
             this.animals.add(prey);
@@ -229,10 +258,11 @@ public class World {
 
         for(int i = 0; i < startingPredatorCount; i++) {
             Predator predator = new Predator(getRandomLocation(),
-                                             startingFoodLevel,
-                                             starvationCoefficient,
+                                             predatorStartingEnergy,
+                                             predatorStarvation,
+                                             predatorStepEnergy,
                                              eatingRadius,
-                                             reproductionFoodLevel,
+                                             predatorReproductionEnergyThreshold,
                                              speed);
             this.animals.add(predator);
         }

@@ -9,10 +9,11 @@ public abstract class Animal implements Cloneable {
     protected boolean alive = true;
     protected final double viewRadius = 15; // WARNING: unused
     //    protected final double size = 10;
-    protected double foodLevel;
+    protected double energy;
     protected final double starvationCoefficient;
+    protected final double stepEnergy;
     protected final double eatingRadius;
-    protected final double reproductionFoodLevel;
+    protected final double reproductionEnergyThreshold;
     protected final double speed;
 
     public Point getLocation() {
@@ -20,18 +21,18 @@ public abstract class Animal implements Cloneable {
     }
 
     public void starve(double timespan) {
-        foodLevel -= timespan * starvationCoefficient;
-        if(foodLevel <= 0) {
+        energy -= timespan * starvationCoefficient;
+        if(energy <= 0) {
             die();
         }
     }
 
     public boolean canReproduce() {
-        return (foodLevel >= reproductionFoodLevel);
+        return (energy >= reproductionEnergyThreshold);
     }
 
     public Animal reproduce() {
-        foodLevel /= 2;
+        energy /= 2;
         try {
             Animal offspring = (Animal) this.clone();
             return offspring;
@@ -54,16 +55,18 @@ public abstract class Animal implements Cloneable {
     }
 
     public Animal(Point location,
-                  double startingFoodLevel,
+                  double startingEnergy,
                   double starvationCoefficient,
+                  double stepEnergy,
                   double eatingRadius,
-                  double reproductionFoodLevel,
+                  double reproductionEnergyThreshold,
                   double speed) {
         this.location = location;
-        this.foodLevel = startingFoodLevel;
+        this.energy = startingEnergy;
         this.starvationCoefficient = starvationCoefficient;
+        this.stepEnergy = stepEnergy;
         this.eatingRadius = eatingRadius;
-        this.reproductionFoodLevel = reproductionFoodLevel;
+        this.reproductionEnergyThreshold = reproductionEnergyThreshold;
         this.speed = speed;
     }
 
@@ -94,6 +97,7 @@ public abstract class Animal implements Cloneable {
         while(!checkMove(newLocation, timespan)) {
             newLocation = getMoveUnchecked(worldView, timespan);
         }
+        energy -= location.getDistance(newLocation) * stepEnergy;
         location = newLocation;
     }
 
@@ -104,14 +108,14 @@ public abstract class Animal implements Cloneable {
 
         for(Food food : worldView.foods) {
             if(getLocation().getDistance(food.getLocation()) < eatingRadius && canEat(food)) {
-                foodLevel += food.getSustenanceValue();
+                energy += food.getSustenanceValue();
                 meal.add(food);
             }
         }
         return meal;
     }
 
-    public double getFoodLevel() {
-        return foodLevel;
+    public double getEnergy() {
+        return energy;
     }
 }
