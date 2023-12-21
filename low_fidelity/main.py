@@ -33,8 +33,8 @@ PREY_STEP_ENERGY = 2
 PRED_STEP_ENERGY = 3
 
 # How much energy each animal gets from eating
-PREY_ENERGY_FROM_FOOD = 3
-PRED_ENERGY_FROM_PREY = 10
+PREY_ENERGY_FROM_FOOD = 50
+PRED_ENERGY_FROM_PREY = 50
 
 # How much energy each animal needs to be able to reproduce
 PREY_REPRODUCTION_THRESHOLD = 15
@@ -44,6 +44,11 @@ PRED_REPRODUCTION_THRESHOLD = 40
 # of animals will reproduce
 PREY_REPRODUCTION_CHANCE = 0.3
 PRED_REPRODUCTION_CHANCE = 0.1
+
+# Animals spawn spontaneously even if there are no other animals
+# of their type to reproduce 
+PREY_SPAWN_RATE = 0.05
+PRED_SPAWN_RATE = 0.05
 
 
 def empty_board(grid_x: int, grid_y: int):
@@ -67,18 +72,37 @@ def populate_board(board: State, num_prey: int, num_pred: int):
 
 
 def repopulate_board(board: State):
-    preys_can_reproduce = 0
-    preds_can_reproduce = 0
+    prey_offsprings = []
+    pred_offsprings = []
     for animal in board.view_animals():
         if isinstance(animal, Prey):
             if animal.energy >= PREY_REPRODUCTION_THRESHOLD:
-                preys_can_reproduce += 1
+                if np.random.rand() < PREY_REPRODUCTION_CHANCE:
+                    # The energy is split equally between the animal 
+                    # and the offspring
+                    animal.energy /= 2
+                    prey_offsprings.append(Prey(x_0=animal.x, y_0=animal.y, 
+                                                energy=animal.energy, 
+                                                step_energy=PREY_STEP_ENERGY))
         elif isinstance(animal, Predator):
             if animal.energy >= PRED_REPRODUCTION_THRESHOLD:
-                preds_can_reproduce += 1
-    new_preys = int(PREY_REPRODUCTION_CHANCE*preys_can_reproduce)
-    new_preds = int(PRED_REPRODUCTION_CHANCE*preds_can_reproduce)
-    populate_board(board, new_preys, new_preds)
+                if np.random.rand() < PRED_REPRODUCTION_CHANCE:
+                    # The energy is split equally between the animal 
+                    # and the offspring
+                    animal.energy /= 2
+                    prey_offsprings.append(Predator(x_0=animal.x, y_0=animal.y, 
+                                                    energy=animal.energy, 
+                                                    step_energy=PRED_STEP_ENERGY))
+    for prey in prey_offsprings:
+        board.add_animal(prey)
+    for pred in pred_offsprings:
+        board.add_animal(pred)
+    
+    # Spontaneously spawn some animals so they don't die out
+    spontaneous_prey_count = np.random.poisson(lam = PREY_SPAWN_RATE)
+    spontaneous_pred_count = np.random.poisson(lam = PRED_SPAWN_RATE)
+    populate_board(board, num_prey=spontaneous_prey_count, num_pred=spontaneous_pred_count)
+    
     spawn_food(board)
     
 
