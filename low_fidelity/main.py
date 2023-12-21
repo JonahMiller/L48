@@ -129,13 +129,17 @@ def interact(board: State):
 
         # Prey eat the food available and get energy
         if n_foods > 0 and n_preys > 0:
-            preys_to_eat = random.sample(preys, min(n_foods, n_preys))
+            food_eaten = min(n_foods, n_preys)
+            preys_to_eat = random.sample(preys, food_eaten)
             for prey in preys_to_eat:
                 prey.energy += PREY_ENERGY_FROM_FOOD
+            
+            for food in foods[0:food_eaten]:
+                board.remove_food(food)
 
         # Food is removed for the next turn
-        for food in foods:
-            board.remove_food(food)
+        # for food in foods:
+        #     board.remove_food(food)
 
         # Each prey dies wp. prey_death_from_pred for each pred,
         # they also die if they run out of energy
