@@ -5,3 +5,5 @@ __pycache__
 
 .python-version
 high_fidelity/out
+
+.vscode
