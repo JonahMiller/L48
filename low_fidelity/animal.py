@@ -8,7 +8,7 @@ STAY = 4
 
 
 class Animal:
-    def __init__(self, x_0: int, y_0: int, energy: int, step_energy: int):
+    def __init__(self, x_0: int, y_0: int, energy: float, step_energy: float):
         self.x = x_0
         self.y = y_0
         self.energy = energy

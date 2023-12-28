@@ -1,8 +1,8 @@
 import copy
 from itertools import chain
-from typing import Iterable
+from typing import Iterable, NamedTuple
 
-from low_fidelity.animal import Animal, Predator, Prey, Food
+from low_fidelity.animal import Animal, Food, Predator, Prey
 
 
 class State:
@@ -35,7 +35,7 @@ class State:
 
     def view_preds_by_loc(self, coord: tuple[int, int]):
         return list(self._pred_grid.get(coord, {}).values())
-    
+
     def view_foods_by_loc(self, coord: tuple[int, int]):
         return list(self._food_grid.get(coord, {}).values())
 
@@ -55,17 +55,14 @@ class State:
     def view_coords_with_food(self):
         for coord in self._food_grid.keys():
             yield coord
-            
-    def view_food_count(self):            
+
+    def view_food_count(self):
         return len(self._foods)
-        
 
     def view_coords_with_items(self):
-        for coord in self._prey_grid.keys() | \
-                     self._pred_grid.keys() | \
-                     self._food_grid.keys():
+        for coord in self._prey_grid.keys() | self._pred_grid.keys() | self._food_grid.keys():
             yield coord
-           
+
     def view_state_summary(self):
         num_preys = len(self._preys)
         num_preds = len(self._preds)
@@ -73,8 +70,8 @@ class State:
         preys_pos = {coord: len(self.view_preys_by_loc(coord)) for coord in self.view_coords_with_prey()}
         preds_pos = {coord: len(self.view_preds_by_loc(coord)) for coord in self.view_coords_with_pred()}
         foods_pos = {coord: len(self.view_foods_by_loc(coord)) for coord in self.view_coords_with_food()}
-        return (num_preys, num_preds, num_foods), (preys_pos, preds_pos, foods_pos)
-    
+        return StateSummary(num_preys, num_preds, num_foods, preys_pos, preds_pos, foods_pos)
+
     # --- Methods for modifying the state ---
     def add_animal(self, animal: Animal):
         if isinstance(animal, Prey):
@@ -107,14 +104,14 @@ class State:
             self._pred_grid.add_animal(animal)
         else:
             raise ValueError(f"Unknown animal type {type(animal)}")
-        
+
     def add_food(self, food: Food):
         if isinstance(food, Food):
             self._foods[id(food)] = food
             self._food_grid.add_food(food)
         else:
             raise ValueError(f"Unknown food type {type(food)}")
-        
+
     def remove_food(self, food: Food):
         if isinstance(food, Food):
             del self._foods[id(food)]
@@ -162,3 +159,13 @@ class LazyFoodGrid(dict[tuple[int, int], dict[int, Food]]):
         if len(self[food.pos]) == 0:
             del self[food.pos]
 
+
+class StateSummary(NamedTuple):
+    """Summary of the state of the simulation."""
+
+    num_preys: int
+    num_preds: int
+    num_foods: int
+    preys_pos: dict[tuple[int, int], int]
+    preds_pos: dict[tuple[int, int], int]
+    foods_pos: dict[tuple[int, int], int]
