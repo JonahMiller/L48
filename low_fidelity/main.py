@@ -7,7 +7,7 @@ from low_fidelity.animal import Predator, Prey, Food
 from low_fidelity.animate import Animate
 from low_fidelity.state import State
 
-STEPS = 1000
+STEPS = 500
 
 GRID_X = 20
 GRID_Y = 20
@@ -212,6 +212,7 @@ def main(steps, grid_x, grid_y, init_prey, init_pred):
     plt.legend()
     plt.savefig("preys_preds.png", dpi=300)
 
+    return num_preys, num_preds
     #a = Animate(len(preds_pos), grid_x, grid_y, preys_pos, preds_pos, foods_pos)
     #a.show()
 
