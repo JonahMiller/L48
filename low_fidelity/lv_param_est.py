@@ -5,11 +5,30 @@ from sklearn.metrics import mean_squared_error as mse
 
 from low_fidelity.main import main, HyperParams
 
-hp = HyperParams()
-prey_data, pred_data = main(hp)
+hp = HyperParams(
+    STEPS = 500,
+    GRID_X = 10,
+    GRID_Y = 10,
+    INIT_PREY = 200,
+    INIT_PRED = 20,
+    NUM_FOOD = 300,
+    MAX_FOOD = 1000,
+    PREY_DEATH_FROM_PRED = 0.1,
+    PREY_ENERGY = 20,
+    PRED_ENERGY = 50,
+    PREY_STEP_ENERGY = 2,
+    PRED_STEP_ENERGY = 3,
+    PREY_ENERGY_FROM_FOOD = 3,
+    PRED_ENERGY_FROM_PREY = 10,
+    PREY_REPRODUCTION_THRESHOLD = 15,
+    PRED_REPRODUCTION_THRESHOLD = 40,
+    PREY_REPRODUCTION_CHANCE = 0.3,
+    PRED_REPRODUCTION_CHANCE = 0.1,
+    PREY_SPAWN_RATE = 0,
+    PRED_SPAWN_RATE = 0)
 
-print(prey_data)
-print(pred_data)
+
+prey_data, pred_data = main(hp)
 
 def form_a_vectors(prey_data, pred_data):
     assert len(prey_data) == len(pred_data), "datasets need same length"
