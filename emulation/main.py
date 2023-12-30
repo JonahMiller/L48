@@ -19,7 +19,7 @@ length_scales = {
     "PRED_REPRODUCTION_THRESHOLD": 500,
     "PRED_ENERGY_FROM_PREY": 50,
     "STEPS": 50,
-    "NUM_FOOD": 25,
+    "NUM_FOOD": 10,
 }
 space = ParameterSpace(
     [
@@ -36,13 +36,13 @@ x_var = "NUM_FOOD"
 assert x_var in space.parameter_names
 
 n_starts = 5
-n_opts = 20
+n_opts = 5
 n_plot = 1000
 n_acq = 2000
 
 X_init = design.get_samples(n_starts)
 X_plot = design.get_samples(n_plot)
-noise_std = 0.1
+noise_std = 0.05
 kernel = GPy.kern.RBF(
     space.dimensionality,
     lengthscale=[length_scales[name] for name in space.parameter_names],
@@ -87,36 +87,33 @@ if __name__ == "__main__":
     # --- Init ---
     Y_init = f(X_init)
     gpy_model = GPy.models.GPRegression(X_init, Y_init, kernel.copy(), noise_var=noise_std**2, normalizer=normalizer)
-    emukit_model = GPyModelWrapper(gpy_model)
+    emukit_model = GPyModelWrapper(gpy_model, n_restarts=5)
     # acquisition = ModelVariance(emukit_model)
     X_acq = design.get_samples(n_acq)
     acquisition = IntegratedVarianceReduction(emukit_model, space, x_monte_carlo=X_acq)
     loop = ExperimentalDesignLoop(space, emukit_model, acquisition)
 
     # --- Main loop ---
+    print(emukit_model.model.kern)
     loop.run_loop(f, n_opts)
+    print(emukit_model.model.kern)
 
     # --- Plot graph ---
-    # Re-fit a model with the acquired points, less buggy this way
-    X_final = loop.loop_state.X
-    Y_final = loop.loop_state.Y
-    gpy_model = GPy.models.GPRegression(
-        X_final, Y_final, kernel.copy(), noise_var=noise_std**2, normalizer=normalizer
-    )
-
     x_dim = space.find_parameter_index_in_model(x_var)[0]
-    y_low, y_mid, y_high = gpy_model.predict_quantiles(X_plot, quantiles=(2.5, 50, 97.5))
+    y_mean, y_var = emukit_model.predict(X_plot)
+    y_low = y_mean - 1.96 * np.sqrt(y_var)
+    y_high = y_mean + 1.96 * np.sqrt(y_var)
     x_1d_idx = np.argsort(X_plot[:, x_dim])  # Plot the first dimension only
     x = X_plot[x_1d_idx, x_dim]
     y_low = y_low[x_1d_idx, 0]
-    y_mid = y_mid[x_1d_idx, 0]
+    y_mid = y_mean[x_1d_idx, 0]
     y_high = y_high[x_1d_idx, 0]
 
     fig, ax = plt.subplots(1, 1)
 
     ax.plot(x, y_mid, "k", lw=2)
     ax.fill_between(x, y_low, y_high, alpha=0.5)
-    ax.scatter(X_final[:, x_dim], Y_final[:, 0])
+    ax.scatter(loop.loop_state.X[:, x_dim], loop.loop_state.Y[:, 0])
     ax.set(
         xlabel=x_var,
         ylabel="Objective",

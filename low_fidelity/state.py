@@ -166,6 +166,6 @@ class StateSummary(NamedTuple):
     num_preys: int
     num_preds: int
     num_foods: int
-    preys_pos: dict[tuple[int, int], int]
-    preds_pos: dict[tuple[int, int], int]
-    foods_pos: dict[tuple[int, int], int]
+    preys_pos: dict[tuple[int, int], int] | None = None
+    preds_pos: dict[tuple[int, int], int] | None = None
+    foods_pos: dict[tuple[int, int], int] | None = None

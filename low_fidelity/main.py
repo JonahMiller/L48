@@ -164,11 +164,7 @@ def interact(board: State, hp: HyperParams):
                 board.remove_animal(pred)
 
 
-def simulate(
-    hp: HyperParams,
-    # steps: int, grid_x: int, grid_y: int, init_prey: int, init_pred: int,
-    save_all: bool = True,
-) -> list[StateSummary]:
+def simulate(hp: HyperParams, save_all: bool = True) -> list[StateSummary]:
     states = []
 
     board = empty_board(hp)
@@ -210,8 +206,8 @@ def main(hp: HyperParams):
     plt.savefig("preys_preds.png", dpi=300)
 
     return num_preys, num_preds
-    #a = Animate(len(preds_pos), grid_x, grid_y, preys_pos, preds_pos, foods_pos)
-    #a.show()
+    # a = Animate(len(preds_pos), grid_x, grid_y, preys_pos, preds_pos, foods_pos)
+    # a.show()
 
 
 if __name__ == "__main__":
