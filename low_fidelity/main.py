@@ -205,7 +205,6 @@ def main(hp: HyperParams):
     plt.legend()
     plt.savefig("preys_preds.png", dpi=300)
 
-    return num_preys, num_preds
     # a = Animate(len(preds_pos), grid_x, grid_y, preys_pos, preds_pos, foods_pos)
     # a.show()
 

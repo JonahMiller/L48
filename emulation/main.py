@@ -12,13 +12,17 @@ from emukit.experimental_design.acquisitions import (
 from emukit.experimental_design.experimental_design_loop import ExperimentalDesignLoop
 from emukit.model_wrappers import GPyModelWrapper
 
+import sys
+sys.path.append("..")
 from low_fidelity.main import HyperParams, simulate
+from low_fidelity.lv_param_est import estimate
+
 
 length_scales = {
-    "PRED_REPRODUCTION_CHANCE": 0.1,
-    "PRED_REPRODUCTION_THRESHOLD": 500,
-    "PRED_ENERGY_FROM_PREY": 50,
-    "STEPS": 50,
+    # "PRED_REPRODUCTION_CHANCE": 0.1,
+    # "PRED_REPRODUCTION_THRESHOLD": 500,
+    # "PRED_ENERGY_FROM_PREY": 50,
+    # "STEPS": 50,
     "NUM_FOOD": 10,
 }
 space = ParameterSpace(
@@ -27,7 +31,7 @@ space = ParameterSpace(
         # DiscreteParameter("PRED_REPRODUCTION_THRESHOLD", range(10, 5001)),
         # DiscreteParameter("PRED_ENERGY_FROM_PREY", range(50, 51)),
         # DiscreteParameter("STEPS", range(0, 1001)),
-        DiscreteParameter("NUM_FOOD", range(0, 201)),
+        DiscreteParameter("NUM_FOOD", range(101, 401)),
     ]
 )
 design = LatinDesign(space)
@@ -60,10 +64,29 @@ def X_to_hp(X: np.ndarray) -> HyperParams:
         dim = space.find_parameter_index_in_model(name)[0]
         dtype = int if isinstance(param, DiscreteParameter) else float
         kwargs[name] = dtype(X[dim])
-    return HyperParams(**kwargs)
+    return HyperParams(**kwargs,
+                       STEPS = 200,
+                       GRID_X = 10,
+                       GRID_Y = 10,
+                       PREY_SPAWN_RATE = 0,
+                       PRED_SPAWN_RATE = 0,
+                       MAX_FOOD = 1000,
+                       PREY_DEATH_FROM_PRED = 0.1,
+                       PREY_ENERGY = 20,
+                       PRED_ENERGY = 50,
+                       PREY_STEP_ENERGY = 2,
+                       PRED_STEP_ENERGY = 3,
+                       PREY_ENERGY_FROM_FOOD = 3,
+                       PRED_ENERGY_FROM_PREY = 10,
+                       PREY_REPRODUCTION_THRESHOLD = 15,
+                       PRED_REPRODUCTION_THRESHOLD = 40,
+                       PREY_REPRODUCTION_CHANCE = 0.3,
+                       PRED_REPRODUCTION_CHANCE = 0.1,
+                      )
 
 
 def f(X: np.ndarray):
+    # Objective function of average predator count
     """Function to emulate"""
 
     avg_preds = []
@@ -78,6 +101,26 @@ def f(X: np.ndarray):
 
     return np.array(avg_preds).reshape(-1, 1)
 
+def g(X: np.ndarray):
+    # Objective function of MSE loss from reconstructed LV model
+    """Function to emulate"""
+
+    mses = []
+    n_preys = []
+    n_preds = []
+    for x_vec in X:
+        hp = X_to_hp(x_vec)
+        print(f"Running {hp}")
+        for summary in simulate(hp):
+            n_preys.append(summary.num_preys)
+            n_preds.append(summary.num_preds)
+
+        est = estimate(n_preys, n_preds, error_bound=1000, success_bound=300)
+        error = est.get_mse()
+        mses.append(error)
+
+    return np.array(mses).reshape(-1, 1)
+
 
 if __name__ == "__main__":
     argparser = argparse.ArgumentParser()
@@ -85,7 +128,7 @@ if __name__ == "__main__":
     args = argparser.parse_args()
 
     # --- Init ---
-    Y_init = f(X_init)
+    Y_init = g(X_init)
     gpy_model = GPy.models.GPRegression(X_init, Y_init, kernel.copy(), noise_var=noise_std**2, normalizer=normalizer)
     emukit_model = GPyModelWrapper(gpy_model, n_restarts=5)
     # acquisition = ModelVariance(emukit_model)
@@ -95,7 +138,7 @@ if __name__ == "__main__":
 
     # --- Main loop ---
     print(emukit_model.model.kern)
-    loop.run_loop(f, n_opts)
+    loop.run_loop(g, n_opts)
     print(emukit_model.model.kern)
 
     # --- Plot graph ---
