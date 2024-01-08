@@ -11,7 +11,7 @@ from low_fidelity.state import StateSummary
 @dataclass
 class HyperParams:
     REPRODUCTION_TYPE: str = "FOOD"
-    STEPS: int = 1000
+    STEPS: int = 10000
     STARTING_PREY: int = 200
     STARTING_PREDATOR: int = 20
     STARTING_BERRY: int = 0
@@ -61,7 +61,7 @@ def split_output(output):
 def simulate(
     hp: HyperParams,
 ) -> list[StateSummary]:
-    path_to_out = Path(__file__).parent / "out"  # Change it according to your IDE settings
+    path_to_out = Path(__file__).parent / "out/production/high_fidelity"  # Change it according to your IDE settings
     command = (
         f"java -cp {path_to_out} PyInterface.Callable "
         f"{hp.REPRODUCTION_TYPE} "

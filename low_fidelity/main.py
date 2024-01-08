@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import animation as animation
 
+import sys
+sys.path.append("..")
 from low_fidelity.animal import Food, Predator, Prey
 from low_fidelity.animate import Animate
 from low_fidelity.state import State, StateSummary
@@ -27,7 +29,7 @@ class HyperParams:
 
     # If a prey and n predators meet, the chance of prey being
     # eaten is 1 - (1 - PREY_DEATH_FROM_PRED)^n
-    PREY_DEATH_FROM_PRED: float = 1.0
+    PREY_DEATH_FROM_PRED: float = 1
 
     # Starting energy for each animal. If their energy falls
     # <= 0 they die.
@@ -205,8 +207,11 @@ def main(hp: HyperParams):
     plt.legend()
     plt.savefig("preys_preds.png", dpi=300)
 
-    # a = Animate(len(preds_pos), grid_x, grid_y, preys_pos, preds_pos, foods_pos)
-    # a.show()
+    print("avg preys", np.mean(num_preys))
+    print("avg preds", np.mean(num_preds))
+
+    a = Animate(len(preds_pos), hp.GRID_X, hp.GRID_Y, preys_pos, preds_pos, foods_pos)
+    a.show()
 
 
 if __name__ == "__main__":

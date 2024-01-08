@@ -6,6 +6,8 @@ from emukit.model_wrappers import GPyModelWrapper
 import GPy
 from emukit.sensitivity.monte_carlo import ModelFreeMonteCarloSensitivity
 
+import sys
+sys.path.append("..")
 from low_fidelity.main import simulate, HyperParams
 from SALib.sample import saltelli
 from SALib.analyze import sobol
