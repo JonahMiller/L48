@@ -3,33 +3,37 @@ from scipy import integrate
 import matplotlib.pyplot as plt
 from sklearn.metrics import mean_squared_error as mse
 
-# hp = HyperParams(
-#     STEPS = 500,
-#     GRID_X = 10,
-#     GRID_Y = 10,
-#     INIT_PREY = 200,
-#     INIT_PRED = 20,
-#     NUM_FOOD = 300,
-#     MAX_FOOD = 1000,
-#     PREY_DEATH_FROM_PRED = 0.1,
-#     PREY_ENERGY = 20,
-#     PRED_ENERGY = 50,
-#     PREY_STEP_ENERGY = 2,
-#     PRED_STEP_ENERGY = 3,
-#     PREY_ENERGY_FROM_FOOD = 3,
-#     PRED_ENERGY_FROM_PREY = 10,
-#     PREY_REPRODUCTION_THRESHOLD = 15,
-#     PRED_REPRODUCTION_THRESHOLD = 40,
-#     PREY_REPRODUCTION_CHANCE = 0.3,
-#     PRED_REPRODUCTION_CHANCE = 0.1,
-#     PREY_SPAWN_RATE = 0,
-#     PRED_SPAWN_RATE = 0)
+from low_fidelity.main import simulate, HyperParams
+
+hp = HyperParams(
+    STEPS = 500,
+    GRID_X = 10,
+    GRID_Y = 10,
+    INIT_PREY = 200,
+    INIT_PRED = 20,
+    NUM_FOOD = 300,
+    MAX_FOOD = 1000,
+    PREY_DEATH_FROM_PRED = 0.4,
+    PREY_ENERGY = 20,
+    PRED_ENERGY = 50,
+    PREY_STEP_ENERGY = 2,
+    PRED_STEP_ENERGY = 3,
+    PREY_ENERGY_FROM_FOOD = 3,
+    PRED_ENERGY_FROM_PREY = 10,
+    PREY_REPRODUCTION_THRESHOLD = 15,
+    PRED_REPRODUCTION_THRESHOLD = 40,
+    PREY_REPRODUCTION_CHANCE = 0.3,
+    PRED_REPRODUCTION_CHANCE = 0.1,
+    PREY_SPAWN_RATE = 0.05,
+    PRED_SPAWN_RATE = 0.05)
 
 
 class estimate:
     def __init__(self, prey_data, pred_data, error_bound=10_000, success_bound=5_000):
         self.prey_data = prey_data
         self.pred_data = pred_data
+        # self.prey_data = [p if p !=0 else 0.1 for p in prey_data]
+        # self.pred_data = [p if p !=0 else 0.1 for p in pred_data]
         self.n = len(self.prey_data)
         self.x_0 = self.prey_data[0]
         self.y_0 = self.pred_data[0]
@@ -56,6 +60,10 @@ class estimate:
 
         self.a_0, self.a_1, self.a_2 = a_x[0], a_x[1], a_x[2]
         self.a_3, self.a_4, self.a_5 = a_y[0], a_y[1], a_y[2]
+
+    def return_a_vectors(self):
+        return float(self.a_0), float(self.a_1), float(self.a_2), \
+               float(self.a_3), float(self.a_4), float(self.a_5)
 
     def derivative(self, X, t):
         x, y = X
@@ -92,8 +100,8 @@ class estimate:
         plt.figure()
         plt.grid()
         plt.title("Real data")
-        plt.plot(np.arange(len(self.n)), self.prey_data, label="Prey")
-        plt.plot(np.arange(len(self.n)), self.pred_data, label="Predator")
+        plt.plot(np.arange(self.n), self.prey_data, label="Prey")
+        plt.plot(np.arange(self.n), self.pred_data, label="Predator")
         plt.legend()
         plt.show()
         plt.clf()
@@ -106,4 +114,3 @@ class estimate:
         plt.plot(t, self.y, label="Predator")
         plt.legend()
         plt.show()
-
