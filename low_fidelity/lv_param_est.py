@@ -3,28 +3,32 @@ from scipy import integrate
 import matplotlib.pyplot as plt
 from sklearn.metrics import mean_squared_error as mse
 
+import sys
+sys.path.append("..")
 from low_fidelity.main import simulate, HyperParams
 
 hp = HyperParams(
     STEPS = 500,
     GRID_X = 10,
     GRID_Y = 10,
-    INIT_PREY = 200,
-    INIT_PRED = 20,
     NUM_FOOD = 300,
     MAX_FOOD = 1000,
-    PREY_DEATH_FROM_PRED = 0.4,
+    
+    INIT_PREY = 200,
     PREY_ENERGY = 20,
-    PRED_ENERGY = 50,
     PREY_STEP_ENERGY = 2,
-    PRED_STEP_ENERGY = 3,
     PREY_ENERGY_FROM_FOOD = 3,
-    PRED_ENERGY_FROM_PREY = 10,
-    PREY_REPRODUCTION_THRESHOLD = 15,
-    PRED_REPRODUCTION_THRESHOLD = 40,
     PREY_REPRODUCTION_CHANCE = 0.3,
-    PRED_REPRODUCTION_CHANCE = 0.1,
     PREY_SPAWN_RATE = 0.05,
+
+    PREY_DEATH_FROM_PRED = 0.4,
+    
+    INIT_PRED = 20,
+    PRED_ENERGY = 50,
+    PRED_STEP_ENERGY = 3,
+    PRED_ENERGY_FROM_PREY = 10,
+    PRED_REPRODUCTION_THRESHOLD = 15,
+    PRED_REPRODUCTION_CHANCE = 0.1,
     PRED_SPAWN_RATE = 0.05)
 
 
@@ -32,8 +36,8 @@ class estimate:
     def __init__(self, prey_data, pred_data, error_bound=10_000, success_bound=5_000):
         self.prey_data = prey_data
         self.pred_data = pred_data
-        # self.prey_data = [p if p !=0 else 0.1 for p in prey_data]
-        # self.pred_data = [p if p !=0 else 0.1 for p in pred_data]
+        # self.prey_data = [p if p !=0 else 1 for p in prey_data]
+        # self.pred_data = [p if p !=0 else 1 for p in pred_data]
         self.n = len(self.prey_data)
         self.x_0 = self.prey_data[0]
         self.y_0 = self.pred_data[0]
@@ -114,3 +118,16 @@ class estimate:
         plt.plot(t, self.y, label="Predator")
         plt.legend()
         plt.show()
+
+
+if __name__ == "__main__":
+    # Generate predator/prey data from low fidelity model
+    n_preys = []
+    n_preds = []
+    for summary in simulate(hp):
+        n_preys.append(summary.num_preys)
+        n_preds.append(summary.num_preds)
+
+    est = estimate(n_preys, n_preds)
+    est.get_mse()
+    est.graph()

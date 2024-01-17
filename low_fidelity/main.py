@@ -203,6 +203,9 @@ def main(hp: HyperParams):
     plt.plot(np.arange(len(num_preys)), num_preys, label="Preys")
     plt.plot(np.arange(len(num_preds)), num_preds, label="Predators")
     # plt.plot(np.arange(len(num_foods)), num_foods, label="Food")
+    plt.grid()
+    plt.xlabel("Steps")
+    plt.ylabel("Population size")
     plt.ylim(0, None)
     plt.legend()
     plt.savefig("preys_preds.png", dpi=300)
@@ -210,10 +213,33 @@ def main(hp: HyperParams):
     print("avg preys", np.mean(num_preys))
     print("avg preds", np.mean(num_preds))
 
-    a = Animate(len(preds_pos), hp.GRID_X, hp.GRID_Y, preys_pos, preds_pos, foods_pos)
-    a.show()
+    # a = Animate(len(preds_pos), hp.GRID_X, hp.GRID_Y, preys_pos, preds_pos, foods_pos)
+    # a.show()
 
 
 if __name__ == "__main__":
-    hp = HyperParams()  # Use default hyperparameters
+    # hp = HyperParams()  # Use default hyperparameters
+
+    hp = HyperParams(
+        STEPS = 1000,
+        GRID_X = 10,
+        GRID_Y = 10,
+        INIT_PREY = 200,
+        INIT_PRED = 20,
+        NUM_FOOD = 250,
+        MAX_FOOD = 1000,
+        PREY_DEATH_FROM_PRED = 0.4,
+        PREY_ENERGY = 20,
+        PRED_ENERGY = 50,
+        PREY_STEP_ENERGY = 2,
+        PRED_STEP_ENERGY = 3,
+        PREY_ENERGY_FROM_FOOD = 3,
+        PRED_ENERGY_FROM_PREY = 10,
+        PREY_REPRODUCTION_THRESHOLD = 15,
+        PRED_REPRODUCTION_THRESHOLD = 20,
+        PREY_REPRODUCTION_CHANCE = 0.3,
+        PRED_REPRODUCTION_CHANCE = 0.1,
+        PREY_SPAWN_RATE = 0,
+        PRED_SPAWN_RATE = 0)
+
     main(hp)

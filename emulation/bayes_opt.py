@@ -19,35 +19,27 @@ from FillBetween3d import fill_between_3d
 
 
 length_scales = {
-    # "PRED_REPRODUCTION_CHANCE": 0.1,
-    # "PRED_REPRODUCTION_THRESHOLD": 500,
-    "PRED_ENERGY_FROM_PREY": 2,
-    # "STEPS": 50,
-    "NUM_FOOD": 10,
+    "PREY_DEATH_FROM_PRED": 0.02
 }
 space = ParameterSpace(
     [
-        # ContinuousParameter("PRED_REPRODUCTION_CHANCE", 0, 1),
-        # DiscreteParameter("PRED_REPRODUCTION_THRESHOLD", range(10, 5001)),
-        DiscreteParameter("PRED_ENERGY_FROM_PREY", range(40, 60)),
-        # DiscreteParameter("STEPS", range(0, 1001)),
-        DiscreteParameter("NUM_FOOD", range(201, 301)),
+        ContinuousParameter("PREY_DEATH_FROM_PRED", 0, 0.3)
     ]
 )
 dims = space.dimensionality
 
 design = LatinDesign(space)
 
-x_var = "NUM_FOOD"
+x_var = "PREY_DEATH_FROM_PRED"
 assert x_var in space.parameter_names
 
 n_starts = 5
-n_opts = 5
+n_opts = 4
 n_plot = 2000
 
 X_init = design.get_samples(n_starts)
 X_plot = design.get_samples(n_plot)
-noise_std = 0.5
+noise_std = 0.1
 kernel = GPy.kern.Matern52(
     dims,
     variance=1,
@@ -67,24 +59,26 @@ def X_to_hp(X: np.ndarray) -> HyperParams:
         dtype = int if isinstance(param, DiscreteParameter) else float
         kwargs[name] = dtype(X[dim])
     return HyperParams(**kwargs,
-                       STEPS = 200,
-                       GRID_X = 10,
-                       GRID_Y = 10,
-                       PREY_SPAWN_RATE = 0,
-                       PRED_SPAWN_RATE = 0,
-                       MAX_FOOD = 1000,
-                       PREY_DEATH_FROM_PRED = 0.1,
-                       PREY_ENERGY = 20,
-                       PRED_ENERGY = 50,
-                       PREY_STEP_ENERGY = 2,
-                       PRED_STEP_ENERGY = 3,
-                       PREY_ENERGY_FROM_FOOD = 3,
-                    #    PRED_ENERGY_FROM_PREY = 10,
-                       PREY_REPRODUCTION_THRESHOLD = 15,
-                       PRED_REPRODUCTION_THRESHOLD = 40,
-                       PREY_REPRODUCTION_CHANCE = 0.3,
-                       PRED_REPRODUCTION_CHANCE = 0.1,
-                      )
+        STEPS = 100,
+        GRID_X = 10,
+        GRID_Y = 10,
+        INIT_PREY = 200,
+        INIT_PRED = 20,
+        NUM_FOOD = 250,
+        MAX_FOOD = 1000,
+        PREY_ENERGY = 20,
+        PRED_ENERGY = 50,
+        PREY_STEP_ENERGY = 2,
+        PRED_STEP_ENERGY = 3,
+        PREY_ENERGY_FROM_FOOD = 3,
+        PRED_ENERGY_FROM_PREY = 10,
+        PREY_REPRODUCTION_THRESHOLD = 15,
+        PRED_REPRODUCTION_THRESHOLD = 20,
+        PREY_REPRODUCTION_CHANCE = 0.3,
+        PRED_REPRODUCTION_CHANCE = 0.1,
+        PREY_SPAWN_RATE = 0,
+        PRED_SPAWN_RATE = 0)
+
 
 
 def f(X: np.ndarray):
@@ -120,6 +114,7 @@ def g(X: np.ndarray):
         est = estimate(n_preys, n_preds, error_bound=1000, success_bound=750)
         error = est.get_mse()
         mses.append(error)
+        print(f"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{error}")
 
     return np.array(mses).reshape(-1, 1)
 
@@ -127,7 +122,7 @@ def g(X: np.ndarray):
 if __name__ == "__main__":
 
     # --- Init ---
-    Y_init = f(X_init)
+    Y_init = g(X_init)
     gpy_model = GPy.models.GPRegression(X_init, Y_init, kernel.copy(), noise_var=noise_std**2, normalizer=normalizer)
     emukit_model = GPyModelWrapper(gpy_model, n_restarts=5)
     expected_improvement = ExpectedImprovement(emukit_model)
@@ -135,7 +130,7 @@ if __name__ == "__main__":
 
     # --- Main loop ---
     print(emukit_model.model.kern)
-    bayesopt_loop.run_loop(f, n_opts)
+    bayesopt_loop.run_loop(g, n_opts)
     print(emukit_model.model.kern)
 
     # --- Plot graph ---
@@ -156,6 +151,7 @@ if __name__ == "__main__":
 
         ax.plot(x, y_mid, "k", lw=2)
         ax.fill_between(x, y_low, y_high, alpha=0.5)
+        ax.scatter(bayesopt_loop.loop_state.X[:, x_dim], bayesopt_loop.loop_state.Y[:, 0])
         ax.set(
             xlabel=x_var,
             ylabel="Objective",
