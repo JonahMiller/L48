@@ -1,51 +1,78 @@
 import argparse
+import sys
 
 import GPy
 import matplotlib.pyplot as plt
 import numpy as np
 from emukit.core import ContinuousParameter, DiscreteParameter, ParameterSpace
 from emukit.core.initial_designs.latin_design import LatinDesign
+from emukit.core.initial_designs.random_design import RandomDesign
 from emukit.experimental_design.acquisitions import (
     IntegratedVarianceReduction,
     ModelVariance,
 )
 from emukit.experimental_design.experimental_design_loop import ExperimentalDesignLoop
 from emukit.model_wrappers import GPyModelWrapper
-from emukit.multi_fidelity.convert_lists_to_array import (
-    convert_x_list_to_array,
-)
+from emukit.multi_fidelity.convert_lists_to_array import convert_x_list_to_array
 
-import sys
 sys.path.append("..")
-from low_fidelity.main import HyperParams, simulate
-from low_fidelity.lv_param_est import estimate
-
 from FillBetween3d import fill_between_3d
+
+from low_fidelity.lv_param_est import estimate
+from low_fidelity.main import HyperParams, simulate
+
+argparser = argparse.ArgumentParser()
+argparser.add_argument("-o", "--output", required=True)
+argparser.add_argument("-d", "--design", choices=["latin", "random"], default="latin")
+argparser.add_argument("-k", "--kernel", choices=["rbf", "matern32", "matern52"], default="rbf")
+args = argparser.parse_args()
+
+
+def get_design_cls():
+    if args.design == "latin":
+        return LatinDesign
+    elif args.design == "random":
+        return RandomDesign
+    else:
+        raise ValueError("Unknown design")
+
+
+def get_kernel_cls():
+    if args.kernel == "rbf":
+        return GPy.kern.RBF
+    elif args.kernel == "matern32":
+        return GPy.kern.Matern32
+    elif args.kernel == "matern52":
+        return GPy.kern.Matern52
+    else:
+        raise ValueError("Unknown kernel")
 
 
 length_scales = {
-    # "PRED_REPRODUCTION_CHANCE": 0.1,
-    # "PRED_REPRODUCTION_THRESHOLD": 500,
+    "PRED_REPRODUCTION_CHANCE": 0.1,
+    "PRED_REPRODUCTION_THRESHOLD": 500,
     "PRED_ENERGY_FROM_PREY": 2,
-    # "STEPS": 50,
-    "NUM_FOOD": 10,
+    "PREY_REPRODUCTION_CHANCE": 0.1,
+    "STEPS": 50,
+    "NUM_FOOD": 50,
 }
 space = ParameterSpace(
     [
+        # ContinuousParameter("PREY_REPRODUCTION_CHANCE", 0, 1),
         # ContinuousParameter("PRED_REPRODUCTION_CHANCE", 0, 1),
         # DiscreteParameter("PRED_REPRODUCTION_THRESHOLD", range(10, 5001)),
-        DiscreteParameter("PRED_ENERGY_FROM_PREY", range(40, 61)),
+        # DiscreteParameter("PRED_ENERGY_FROM_PREY", range(40, 61)),
         # DiscreteParameter("STEPS", range(0, 1001)),
-        DiscreteParameter("NUM_FOOD", range(101, 401)),
+        DiscreteParameter("NUM_FOOD", range(0, 1001)),
     ]
 )
 dims = space.dimensionality
-design = LatinDesign(space)
+design = get_design_cls()(space)
 
 x_var = "NUM_FOOD"
 assert x_var in space.parameter_names
 
-n_starts = 5
+n_starts = 20
 n_opts = 5
 n_plot = 1000
 n_acq = 2000
@@ -53,11 +80,7 @@ n_acq = 2000
 X_init = design.get_samples(n_starts)
 X_plot = design.get_samples(n_plot)
 noise_std = 0.05
-kernel = GPy.kern.RBF(
-    dims,
-    lengthscale=[length_scales[name] for name in space.parameter_names],
-    ARD=True,
-)
+kernel = get_kernel_cls()(dims, lengthscale=[length_scales[name] for name in space.parameter_names], ARD=True)
 normalizer = GPy.normalizer.Standardize()
 
 
@@ -70,25 +93,26 @@ def X_to_hp(X: np.ndarray) -> HyperParams:
         dim = space.find_parameter_index_in_model(name)[0]
         dtype = int if isinstance(param, DiscreteParameter) else float
         kwargs[name] = dtype(X[dim])
-    return HyperParams(**kwargs,
-                       STEPS = 200,
-                       GRID_X = 10,
-                       GRID_Y = 10,
-                       PREY_SPAWN_RATE = 0,
-                       PRED_SPAWN_RATE = 0,
-                       MAX_FOOD = 1000,
-                       PREY_DEATH_FROM_PRED = 0.1,
-                       PREY_ENERGY = 20,
-                       PRED_ENERGY = 50,
-                       PREY_STEP_ENERGY = 2,
-                       PRED_STEP_ENERGY = 3,
-                       PREY_ENERGY_FROM_FOOD = 3,
-                    #    PRED_ENERGY_FROM_PREY = 10,
-                       PREY_REPRODUCTION_THRESHOLD = 15,
-                       PRED_REPRODUCTION_THRESHOLD = 40,
-                       PREY_REPRODUCTION_CHANCE = 0.3,
-                       PRED_REPRODUCTION_CHANCE = 0.1,
-                      )
+    return HyperParams(
+        **kwargs,
+        STEPS=400,
+        # GRID_X=10,
+        # GRID_Y=10,
+        PREY_SPAWN_RATE=0,
+        PRED_SPAWN_RATE=0,
+        # MAX_FOOD=1000,
+        PREY_DEATH_FROM_PRED=0.1,
+        # PREY_ENERGY=20,
+        # PRED_ENERGY=50,
+        # PREY_STEP_ENERGY=2,
+        # PRED_STEP_ENERGY=3,
+        # PREY_ENERGY_FROM_FOOD=3,
+        # #    PRED_ENERGY_FROM_PREY = 10,
+        # PREY_REPRODUCTION_THRESHOLD=15,
+        # PRED_REPRODUCTION_THRESHOLD=40,
+        # # PREY_REPRODUCTION_CHANCE=0.3,
+        # PRED_REPRODUCTION_CHANCE=0.1,
+    )
 
 
 def f(X: np.ndarray):
@@ -103,9 +127,10 @@ def f(X: np.ndarray):
         print(f"Running {hp}")
         for summary in simulate(hp):
             n_preds.append(summary.num_preds)
-        avg_preds.append(np.mean(n_preds))
+        avg_preds.append(np.std(n_preds))
 
     return np.array(avg_preds).reshape(-1, 1)
+
 
 def g(X: np.ndarray):
     # Objective function of MSE loss from reconstructed LV model
@@ -129,18 +154,14 @@ def g(X: np.ndarray):
 
 
 if __name__ == "__main__":
-    argparser = argparse.ArgumentParser()
-    argparser.add_argument("-o", "--output", required=True)
-    args = argparser.parse_args()
-
     # --- Init ---
     Y_init = f(X_init)
     gpy_model = GPy.models.GPRegression(X_init, Y_init, kernel.copy(), noise_var=noise_std**2, normalizer=normalizer)
     emukit_model = GPyModelWrapper(gpy_model, n_restarts=5)
-    # acquisition = ModelVariance(emukit_model)
     X_acq = design.get_samples(n_acq)
     acquisition = IntegratedVarianceReduction(emukit_model, space, x_monte_carlo=X_acq)
     loop = ExperimentalDesignLoop(space, emukit_model, acquisition)
+    # loop.model_updaters = []  # Don't update model hyperparameters
 
     # --- Main loop ---
     print(emukit_model.model.kern)
@@ -169,7 +190,7 @@ if __name__ == "__main__":
             ylabel="Objective",
             title=f"Emulating objective function for {x_var}",
         )
-        
+
     elif dims == 2:
         x1_min, x1_max = space.parameters[0].bounds[0]
         x2_min, x2_max = space.parameters[1].bounds[0]
@@ -181,11 +202,11 @@ if __name__ == "__main__":
 
         x_plot = np.vstack((x1_plot.flatten(), x2_plot.flatten())).T
         x_plot_low, x_plot_high = np.array_split(convert_x_list_to_array([x_plot, x_plot]), 2)
-        
+
         y_plot_mean_low, y_plot_var_low = emukit_model.predict(x_plot_low)
-        y_low = y_plot_mean_low - 1.96*np.sqrt(y_plot_var_low)
+        y_low = y_plot_mean_low - 1.96 * np.sqrt(y_plot_var_low)
         y_plot_mean_high, y_plot_var_high = emukit_model.predict(x_plot_high)
-        y_high = y_plot_mean_high + 1.96*np.sqrt(y_plot_var_high)
+        y_high = y_plot_mean_high + 1.96 * np.sqrt(y_plot_var_high)
 
         low = [x1_plot.reshape(-1), x2_plot.reshape(-1), y_low.reshape(-1)]
         high = [x1_plot.reshape(-1), x2_plot.reshape(-1), y_high.reshape(-1)]
@@ -194,14 +215,13 @@ if __name__ == "__main__":
 
         fig = plt.figure()
 
-        ax = fig.add_subplot(projection='3d')
-        
-        ax.plot_wireframe(x1_plot, x2_plot, y_plot_mean.reshape(x1_plot.shape),
-                          rcount = 20, ccount = 20, color="k")
-        
+        ax = fig.add_subplot(projection="3d")
+
+        ax.plot_wireframe(x1_plot, x2_plot, y_plot_mean.reshape(x1_plot.shape), rcount=20, ccount=20, color="k")
+
         ax.plot(*low, alpha=0)
         ax.plot(*high, alpha=0)
-        
+
         ax.set(
             xlabel=space.parameter_names[0],
             ylabel=space.parameter_names[1],
@@ -214,4 +234,5 @@ if __name__ == "__main__":
 
     fig.savefig(args.output, dpi=300)
     plt.legend()
+    plt.show()
     plt.show()

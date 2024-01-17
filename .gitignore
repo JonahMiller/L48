@@ -7,3 +7,4 @@ __pycache__
 high_fidelity/out
 
 .vscode
+*.ipynb

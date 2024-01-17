@@ -11,7 +11,7 @@ from low_fidelity.state import StateSummary
 @dataclass
 class HyperParams:
     REPRODUCTION_TYPE: str = "FOOD"
-    STEPS: int = 10000
+    STEPS: int = 1000
     STARTING_PREY: int = 200
     STARTING_PREDATOR: int = 20
     STARTING_BERRY: int = 0
@@ -22,8 +22,8 @@ class HyperParams:
     PREDATOR_STARTING_ENERGY: int = 50
     PREY_STARVATION: int = 2
     PREDATOR_STARVATION: int = 2
-    PREY_STEP_ENERGY: int = 0
-    PREDATOR_STEP_ENERGY: int = 0
+    PREY_STEP_ENERGY: float = 0
+    PREDATOR_STEP_ENERGY: float = 0
     # In low-fidelity animals eat in an area of 2500, we want the same here with a circle
     EATING_RADIUS: float = math.sqrt(2500 / math.pi)
     PREDATOR_EATING_PROBABILITY: float = 1
@@ -60,8 +60,8 @@ def split_output(output):
 # Make sure Callable.java is compiled
 def simulate(
     hp: HyperParams,
+    path_to_out: Path | str = Path(__file__).parent / "out/production/high_fidelity",
 ) -> list[StateSummary]:
-    path_to_out = Path(__file__).parent / "out/production/high_fidelity"  # Change it according to your IDE settings
     command = (
         f"java -cp {path_to_out} PyInterface.Callable "
         f"{hp.REPRODUCTION_TYPE} "
